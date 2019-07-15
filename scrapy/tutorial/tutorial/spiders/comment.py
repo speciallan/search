@@ -2,7 +2,6 @@
 
 import scrapy
 
-from ..items import JdPhoneItem
 from ..items import CommentItem
 import re
 import urllib.request
