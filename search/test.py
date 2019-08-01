@@ -25,6 +25,9 @@ def index(es):
                     "username": {
                         "type": "text"
                     },
+                    "time": {
+                        "type": "text",
+                    },
                     "content": {
                         "type": "text",
                         "analyzer": "ik_smart"
@@ -74,11 +77,13 @@ if __name__ == '__main__':
 
     es = connect()
 
-    file = open('mydata1.json')
+    file = open('../scrapy/tutorial/tutorial/spiders/mydata1.json')
 
     body = []
     for i in file.readlines():
         body.append(i)
+
+    print(len(body))
 
     # del_index(es)
     # insert(es)
