@@ -13,7 +13,7 @@ class CommentTaskSpider(scrapy.Spider):
     name = "comment_task"
 
     # 打开存放链接得txt文件
-    links = open("product_url.txt")
+    links = open("my_product_url.txt")
     link = links.readlines()
 
     # 从商品链接中提取商品id，并构造评论页url

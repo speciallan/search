@@ -10,7 +10,7 @@ import urllib.request
 class CommentSpider(scrapy.Spider):
 
     name = "comment"
-    classes = 20
+    classes = 50
     comment_page = 20 # <=50
 
     # 打开存放链接得txt文件

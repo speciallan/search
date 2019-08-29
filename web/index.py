@@ -8,13 +8,17 @@ import json
 sys.path.append('..')
 
 from flask import Flask, request, render_template
+from flask_sqlalchemy import SQLAlchemy
 
 app = Flask(__name__, template_folder='./')
 
 # 代码热更新
 app.debug = True
-file = open('../search/mydata1.json')
-body = file.readlines()
+
+# https://www.cnblogs.com/demodashi/p/8491170.html
+@app.route('/admin')
+def admin():
+    pass
 
 @app.route('/spider')
 def spider():
@@ -26,6 +30,9 @@ def spider_data():
 
     get = request.args
     i = get['index']
+
+    file = open('../search/mydata1.json')
+    body = file.readlines()
     write_body = body[int(i)]
 
     # print(body[0])
