@@ -9,31 +9,34 @@
     <div id="mainbox" style="width: 96%;background-color:lightgoldenrodyellow;
     color: white;text-align: left;line-height: 30px;padding-left: 2%;padding-right:2%;font-size: 20px">
 
-        <span style="color: #2eadfa;font-size: 40px;line-height:80px;background-color: lightyellow">爬虫进度</span><br>
-        <span id='process' style="color: black;margin-left: auto">正在爬取jd.com的用户评论数据...</span><br><br>
+        <span style="color: #2eadfa;font-size: 40px;line-height:80px;background-color: lightyellow">评论搜索</span><br>
+        <input id="keywords"></input>
+        <button id="btn">搜索</button><br><br>
+        <div id="result"></div>
+        <!--<span id='process' style="color: black;margin-left: auto">正在爬取jd.com的用户评论数据...</span><br><br>-->
 
     </div>
 
     <script>
         $(function(){
-            i = 0;
-            setInterval(aa,1000);
+            $('#btn').click(function(){
+                aa();
+            });
+
             function aa(){
                 // $("#mainbox").append("fdsadfsa");
                 $.ajax({
                     type: "GET",
-                    url: "http://172.20.53.47:8888/spider_data",
+                    url: "http://172.20.53.47:8888/search_data",
                     dataType: "html",
-                    data: "method=getComment&index=" + i,
+                    data: "keywords=" + $('#keywords').val(),
                     beforeSend: function(XMLHttpRequest) {
                         // $("#float").text("正在查询...");
                         //Pause(this,100000);
                     },
                     success: function(msg) {
                         str = '<span style="color:black">' + msg + '</span>'
-                        $("#mainbox").append(str);
-                        i++;
-                        // $("#mainbox").css("color", "red");
+                        $("#result").html(str);
                     },
                     complete: function(XMLHttpRequest, textStatus) {
                         //隐藏正在查询图片

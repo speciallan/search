@@ -24,8 +24,19 @@ class CommentPipeline(object):
 
         count = 0
 
+        # print('len:', len(item['time']), len(item['content']))
+        # print(item['content'])
+
+
+        for i in range(len(item["time"])):
+
+            # time
+            item['time'][i] = item["time"][i].replace('\r\n', '')
+
         # 去掉换行符与回车符
-        for i in range(0, len(item["content"])):
+        for i in range(len(item["content"])):
+
+            # content
             pattern = re.match('(\r\n)+', item["content"][i])
             if (not pattern):
                 item["content"][count] = item["content"][i]
@@ -33,15 +44,23 @@ class CommentPipeline(object):
             else:
                 continue
 
+        # 写json
         for j in range(0, len(item["username"])):
+
             username = item["username"][j]
+            time = item["time"][j]
             content = item["content"][j]
-            goods1 = {"username": username, "content": content}
+
+            goods1 = {"username": username, "time":time, "content": content}
             i = json.dumps(dict(goods1), ensure_ascii=False)
             line = i + '\n'
             self.file.write(line)
 
         return item
 
+    def open_spider(self, spider):
+        print('爬虫开始了...')
+
     def close_spider(self, spider):
         self.file.close()
+        print('爬虫结束了...')

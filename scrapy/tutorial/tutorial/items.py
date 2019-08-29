@@ -23,4 +23,5 @@ class CommentItem(scrapy.Item):
 
     username = scrapy.Field()
     comment_num = scrapy.Field()
+    time = scrapy.Field()
     content = scrapy.Field()
