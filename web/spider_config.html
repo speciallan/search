@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <script src="https://cdn.bootcss.com/jquery/3.2.0/jquery.js"></script>
+</head>
+<body>
+    <form>
+    【爬虫规则配置】<br/>
+    爬虫地址：<input style="width: 1000px" value="https://search.jd.com/Search?keyword=手机&enc=utf-8&page">
+    <br/><br/>
+    【字段设置】<br/>
+        标题： <input style="width: 1000px" value="//div[@class='p-name p-name-type-2']/a[@target='_blank']/@title"><br/>
+    价格：<input style="width: 1000px" value="//div[@class='p-price']/strong/@data-price"><br/>
+    链接：<input style="width: 1000px " value='//div[@class="p-name p-name-type-2"]/a[@target="_blank"]/@href'><br/>
+    </form>
+</body>
+</html>
