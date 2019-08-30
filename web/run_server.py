@@ -5,9 +5,10 @@
 import sys
 import time
 import json
-sys.path.append('..')
+sys.path.append('../..')
 
 from flask import Flask, request, render_template, url_for, redirect, jsonify
+from search.web import config
 from flask_sqlalchemy import SQLAlchemy
 
 app = Flask(__name__,
@@ -15,9 +16,9 @@ app = Flask(__name__,
             # static_folder='static',
             # static_url_path='/static'
             )
+app.config.from_object(config)
 
-# 代码热更新
-app.debug = True
+from search.web import db
 
 
 @app.route('/login', methods = ['GET', 'POST'])
@@ -46,20 +47,23 @@ def admin():
     return render_template('admin/index.html',text=text)
 
     # if request.method == "POST":
-        # username = request.form.get("username")
-        # password = request.form.get("password")
-        # password2 = request.form.get("password2")
+    # username = request.form.get("username")
+    # password = request.form.get("password")
+    # password2 = request.form.get("password2")
 
 
 @app.route('/crawler/list')
-def crawler_list():
+@app.route('/crawler/list/<int:page>', methods=['GET', 'POST'])
+def crawler_list(page=1):
+    # db.create_all() # 用来创建table，一般在初始化的时候调用
+    # pagination = AppInfo.query.paginate(page, 20, False)
     return render_template('admin/crawler_list.html')
+    # return render_template('admin/crawler_list.html', pagination=pagination)
 
 
 @app.route('/crawler/add', methods = ['GET', 'POST'])
 def crawler_add():
     return render_template('admin/crawler_add.html')
-
 
 @app.route('/api/info', methods = ['GET'])
 def api_info():
