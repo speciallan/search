@@ -3,7 +3,7 @@
 # Author:Speciallan
 
 from flask import Flask, request, render_template, url_for, redirect, jsonify
-from search.web.run_server import app
-from search.web.app.admin.models import *
+from search.web.app import app
+from search.web.apps.admin.models import *
 
 
