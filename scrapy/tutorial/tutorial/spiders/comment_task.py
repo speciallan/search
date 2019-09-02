@@ -12,6 +12,9 @@ class CommentTaskSpider(scrapy.Spider):
 
     name = "comment_task"
 
+    def __init__(self, url=''):
+        super(CommentTaskSpider, self).__init__()
+
     # 打开存放链接得txt文件
     links = open("my_product_url.txt")
     link = links.readlines()

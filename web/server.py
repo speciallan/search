@@ -3,50 +3,94 @@
 # Author:Speciallan
 
 import sys
-sys.path.append('..')
-
 import time
 import json
-from flask import Flask, request
-from flask_sockets import Sockets
-from gevent import pywsgi
-from geventwebsocket.handler import WebSocketHandler
+sys.path.append('../..')
 
-app = Flask(__name__)
+from flask import Flask, request, render_template, url_for, redirect, jsonify, make_response
+from flask_sqlalchemy import SQLAlchemy
+from search.web import config
 
-# 代码热更新
-app.debug = True
+app = Flask(__name__,
+            template_folder='templates',
+            # static_folder='static',
+            # static_url_path='/static'
+            )
+app.config.from_object(config)
 
-sockets = Sockets(app)
-now = time.strftime('%Y-%m-%d-%H-%M-%S', time.localtime(time.time()))
+# 初始化数据库
+# from search.web import database
+db = SQLAlchemy(app)
+db.init_app(app)
 
 
-@sockets.route('/test')  # 指定路由
-def echo_socket(ws):
-    while not ws.closed:
-        ws.send(str("message test!"))  # 回传给clicent
-        """ 服务端必须接收到客户端发的消息才能保持该服务运行，如果ws.receive()没有接收到客户端发送的
-         消息，那么它会关闭与客户端建立的链接
-         底层解释：Read and return a message from the stream. If `None` is returned, then
-        the socket is considered closed/errored.
-        所以客户端只建立连接，不与服务端交互通信，则无法实现自由通信状态，之后在客户端代码处会有详细内容。
-         """
-        message = ws.receive()  # 接收到消息
-        if message is not None:
-            print("%s receive msg==> " % now, str(json.dumps(message)))
-            """ 如果客户端未发送消息给服务端，就调用接收消息方法，则会导致receive()接收消息为空，关闭此次连接 """
-            ws.send(str(json.dumps(message)))  # 回传给clicent
+@app.route('/login', methods = ['GET', 'POST'])
+def login():
+    if request.method == "GET":
+        return render_template('admin/login.html')
+
+    elif request.method == "POST":
+        username = request.form.get('username')
+        password = request.form.get('password')
+
+        if username == "admin" and password == "123456":
+            resp = make_response(redirect('admin'))
+            resp.set_cookie('username', username)
+            return resp
+            # return redirect('admin')
+            # return "<h1>welcome, %s !</h1>" % username
         else:
-            print(now, "no receive")
+            return "<h1>登录失败!</h1>"
+            # return render_template('admin/index.html')
 
 
-@app.route('/')
-def hello():
-    return 'hello world'
+@app.route('/admin')
+def admin():
+    username = request.cookies.get('username')
+    if username:
+        text = '2222'
+        return render_template('admin/index.html',text=text)
+    else:
+        return redirect('login')
+
+
+@app.route('/comment/list')
+@app.route('/comment/list/<int:page>')
+def comment_list(page=1):
+
+    from search.web.apps.admin.models import Comment
+
+    per_page = 100
+    total = Comment.query.count()
+    data = Comment.query.order_by(Comment.id).limit(per_page).offset((page - 1) * per_page).all()
+    paginate = Comment.query.paginate(page, per_page)
+    print(paginate.has_prev, paginate.has_next)
+
+    return render_template('admin/comment_list.html',
+                           total=total,
+                           data=data,
+                           paginate=paginate)
+
+
+@app.route('/crawler/list')
+@app.route('/crawler/list/<int:page>', methods=['GET', 'POST'])
+def crawler_list(page=1):
+    from search.web.apps.admin.models import Comment
+    data = Comment.query.limit(10).order_by(Comment.id).all()
+    return render_template('admin/crawler_list.html',
+                           data=data)
+
+
+@app.route('/crawler/add', methods = ['GET', 'POST'])
+def crawler_add():
+    return render_template('admin/crawler_add.html')
+
+
+@app.route('/api/info', methods = ['GET'])
+def api_info():
+    data = {'name':'speciallan', 'age':28}
+    return jsonify(data)
 
 
 if __name__ == '__main__':
-
-    server = pywsgi.WSGIServer(('0.0.0.0', 5000), app, handler_class=WebSocketHandler)
-    print('server start')
-    server.serve_forever()
+    app.run(host='0.0.0.0', port=8888)

@@ -3,13 +3,13 @@
 # Author:Speciallan
 
 from flask_sqlalchemy import SQLAlchemy
-from search.web.app import app
+from search.web.server import app
 
 # 数据库
 db = SQLAlchemy(app)
 db.init_app(app)
 
-from search.web.apps.admin import models
+from search.web.apps.admin.models import *
 
 # db.drop_all()
 # db.create_all()

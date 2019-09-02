@@ -2,7 +2,7 @@
 # -*- coding:utf-8 -*-
 # Author:Speciallan
 
-from search.web.app import db
+from search.web.server import db
 
 
 class User(db.Model):
@@ -14,6 +14,17 @@ class User(db.Model):
     def __init__(self, username, email=''):
         self.username = username
         self.email = email
+
+
+class Product(db.Model):
+    __tablename__ = "product"
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    title = db.Column(db.String(100), default='')
+    
+    content = db.Column(db.Text(), default='')
+    time = db.Column(db.String(20), default='')
+    is_member = db.Column(db.Integer(), default=0)
+    star = db.Column(db.Integer(), default=0)
 
 class Comment(db.Model):
     __tablename__ = "comment"
@@ -30,6 +41,7 @@ class Comment(db.Model):
         self.time = time
         self.is_member = is_member
         self.star = star
+
 
 class Crawler(db.Model):
     __tablename__ = "crawler"
