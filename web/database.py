@@ -12,7 +12,11 @@ db.init_app(app)
 from search.web.apps.admin.models import *
 
 # db.drop_all()
-# db.create_all()
+db.create_all()
+
+# db.reflect(app=app)     #1、映射app数据库中的表（app其实就是本程序的flask实例，已连接到数据库）
+# tables=db.metadata.tables   #2、取得所有数据库（返回：immutabledict，里面实际包含了数据库中所有表的结构
+# [print(i) for i in tables]
 
 # admin = User('admin', '222')
 # db.session.add(admin)
@@ -29,13 +33,14 @@ data = [{"username": "不***子", "content": "用了一段时间过来评论了�
  {"username": "j***1", "content": "此用户未填写评价内容"}]
 
 # for i in data:
-#     insert = Comment(i['username'], i['content'], '', 0, 0)
+#     insert = Comment(1, i['username'], i['content'], '', 0, 0)
 #     db.session.add(insert)
 # db.session.commit()
 
 # select
-# result = Comment.query.filter().all()
+# result = Crawler.query.filter().all()
 # result = Comment.query.all()
+# print(result)
 # [print(i.id, i.username) for i in result]
 
 # update

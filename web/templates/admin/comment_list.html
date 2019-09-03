@@ -43,22 +43,24 @@
 				<table class="table table-border table-bordered table-bg table-hover table-sort">
 					<thead>
 						<tr class="text-c">
-							<th width="25"><input type="checkbox" name="" value=""></th>
 							<th width="40">ID</th>
+							<th width="40">类别</th>
+							<th width="40">商品</th>
 							<th width="80">用户名</th>
 							<th width="180">评论</th>
 							<th width="80">时间</th>
 							<th width="40">星星</th>
 							<th width="75">是否会员</th>
 							<th width="60">发布状态</th>
-							<th width="120">操作</th>
+							<th width="80">操作</th>
 						</tr>
 					</thead>
 					<tbody>
                     	{% for item in data %}
 						<tr class="text-c">
-							<td><input type="checkbox" value="" name=""></td>
 							<td>{{item.id}}</td>
+							<td>{{item.cate_name}}</td>
+							<td>{{item.name}}</td>
 							<td class="text-l"><u style="cursor:pointer" class="text-primary" onClick="article_edit('查看','article-zhang.html','10001')" title="查看">{{item.username}}</u></td>
 							<td>{{item.content}}</td>
 							<td>{{item.time}}</td>
