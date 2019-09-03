@@ -175,12 +175,18 @@ def comment_list(page=1):
 @app.route('/api/comment/<int:page>')
 def api_info(page=1):
 
-    from search.web.apps.admin.models import Comment
+    from search.web.apps.admin.models import Comment, Product, Category
     per_page = 10
 
     total = Comment.query.count()
-    data = Comment.query.order_by(Comment.id).limit(per_page).offset((page - 1) * per_page).all()
-    json_data = utils.orm_to_json(data)
+    data = Comment.query \
+        .with_entities(Comment.id, Comment.username, Comment.content, Comment.time, Comment.star, Comment.is_member, Product.name, Category.name.label('cate_name')) \
+        .join(Product, Comment.product_id == Product.id) \
+        .join(Category, Category.id == Product.cate_id) \
+        .order_by(Comment.id).limit(per_page).offset((page - 1) * per_page).all()
+
+    # json_data = utils.orm_to_json(data)
+    json_data = data
 
     result = {'total':total, 'data':json_data}
     return jsonify(result)
