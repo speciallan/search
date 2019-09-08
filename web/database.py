@@ -59,6 +59,8 @@ fields = {"username":"//div[@class='i-item']/@data-nicknam",
 
 # delete
 # db.session.delete(result)
+# result = Comment.query.all()
+# [db.session.delete(i) for i in result]
 # db.session.commit()
 
 

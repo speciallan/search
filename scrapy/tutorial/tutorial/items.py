@@ -21,6 +21,7 @@ class JdPhoneItem(scrapy.Item):
 
 class CommentItem(scrapy.Item):
 
+    crawler_id = scrapy.Field()
     username = scrapy.Field()
     comment_num = scrapy.Field()
     time = scrapy.Field()

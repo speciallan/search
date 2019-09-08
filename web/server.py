@@ -25,6 +25,9 @@ from search.web import database
 db = SQLAlchemy(app)
 db.init_app(app)
 
+# 准备
+from search.web import prepare
+
 # 初始化任务
 from search.web import task
 

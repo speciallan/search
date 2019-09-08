@@ -48,11 +48,16 @@ class CommentPipeline(object):
         # 写json
         for j in range(0, len(item["username"])):
 
+            crawler_id = item["crawler_id"][j]
             username = item["username"][j]
             time = item["time"][j]
             content = item["content"][j]
 
-            goods1 = {"username": username, "time":time, "content": content}
+            goods1 = {"crawler_id":crawler_id,
+                      "username": username,
+                      "time":time,
+                      "content": content}
+
             i = json.dumps(dict(goods1), ensure_ascii=False)
             line = i + '\n'
             self.file.write(line)
