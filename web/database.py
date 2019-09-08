@@ -37,6 +37,16 @@ data = [{"username": "不***子", "content": "用了一段时间过来评论了�
 #     db.session.add(insert)
 # db.session.commit()
 
+import json
+import time, datetime
+fields = {"username":"//div[@class='i-item']/@data-nicknam",
+        "time":"//div[@class='i-item']/div[@class='o-topic']/span[@class='date-comment']/a/text()",
+        "content":"//div[@class='comment-content']/dl/dd/text()"}
+# print(json.dumps(fields))
+# print(time.time())
+# date = datetime.datetime.utcfromtimestamp(time.time()).strftime('%Y-%m-%d %H:%M:%S')
+# print(date)
+
 # select
 # result = Crawler.query.filter().all()
 # result = Comment.query.all()

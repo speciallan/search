@@ -5,6 +5,7 @@
 import sys
 import time
 import json
+import datetime
 sys.path.append('../..')
 
 from flask import Flask, request, render_template, url_for, redirect, jsonify, make_response
@@ -59,21 +60,73 @@ def admin():
 @app.route('/crawler/add', methods = ['GET', 'POST'])
 def crawler_add():
     if request.method == "GET":
-        return render_template('admin/crawler_add.html')
+        from search.web.apps.admin.models import Product
+        product_list = Product.query.with_entities(Product.id, Product.name).all()
+        origin_list = [{'id':'jd', 'name':'京东'}]
+        return render_template('admin/crawler_add.html',
+                               product_list=product_list,
+                               origin_list=origin_list)
 
     elif request.method == "POST":
-        category_name = request.form.get('category_name')
-        print(category_name)
+        from search.web.apps.admin.models import Crawler
+        product_id = request.form.get('product_id')
+        product_origin = request.form.get('product_origin')
+        product_website = request.form.get('product_website')
+        starttime = request.form.get('starttime')
+        endtime = request.form.get('endtime')
+        schedule = request.form.get('schedule')
+
+        names, fields = [], []
+        names.append(request.form.get('name1'))
+        names.append(request.form.get('name2'))
+        names.append(request.form.get('name3'))
+        names.append(request.form.get('name4'))
+        fields.append(request.form.get('fields1'))
+        fields.append(request.form.get('fields2'))
+        fields.append(request.form.get('fields3'))
+        fields.append(request.form.get('fields4'))
+
+        starttime = '1970-01-01 00:00:00' if starttime == '' else starttime
+        endtime = '1970-01-01 00:00:00' if endtime == '' else endtime
+        starttime = time.mktime(time.strptime(starttime, "%Y-%m-%d %H:%M:%S"))
+        endtime = time.mktime(time.strptime(endtime, "%Y-%m-%d %H:%M:%S"))
+
+        avalible_fileds = {}
+        for i,name in enumerate(names):
+            if name != '' and fields[i] != '':
+                avalible_fileds[name] = fields[i]
+
+        avalible_fileds = json.dumps(avalible_fileds)
+        # print(avalible_fileds, json.dumps(avalible_fileds))
+        in_use = 1
+
+        crawler = Crawler(product_id, product_origin, product_website, starttime, endtime, schedule, avalible_fileds, in_use)
+        db.session.add(crawler)
+        db.session.commit()
+
+        return redirect('crawler/list')
 
 
 @app.route('/crawler/list')
 @app.route('/crawler/list/<int:page>', methods=['GET', 'POST'])
 def crawler_list(page=1):
-    from search.web.apps.admin.models import Crawler
+    from search.web.apps.admin.models import Crawler, Product
+
     per_page = 100
     total = Crawler.query.count()
-    data = Crawler.query.order_by(Crawler.id).limit(per_page).offset((page - 1) * per_page).all()
+    results = Crawler.query.with_entities(Crawler.id, Crawler.product_website, Crawler.product_origin, Crawler.starttime, Crawler.endtime, Crawler.schedule, Crawler.fields, Crawler.is_use, Product.name.label('product_name'))\
+        .join(Product, Crawler.product_id == Product.id)\
+        .order_by(Crawler.id).limit(per_page).offset((page - 1) * per_page).all()
     paginate = Crawler.query.paginate(page, per_page)
+
+    # flask_sqlalchemy reuslt->dict
+    data = [dict(zip(result.keys(), result)) for result in results]
+
+    for item in data:
+        item['starttime_str'] = datetime.datetime.utcfromtimestamp(int(item['starttime'])).strftime('%Y-%m-%d %H:%M:%S')
+        item['endtime_str'] = datetime.datetime.utcfromtimestamp(int(item['endtime'])).strftime('%Y-%m-%d %H:%M:%S')
+        item['schedule_str'] = '每天0点' if item['schedule'] == 0 else '无'
+        item['is_use_str'] = '是' if item['is_use'] == 1 else '否'
 
 
     return render_template('admin/crawler_list.html',
@@ -152,17 +205,25 @@ def product_list(page=1):
 @app.route('/comment/list/<int:page>')
 def comment_list(page=1):
 
-    from search.web.apps.admin.models import Comment, Product, Category
+    from search.web.apps.admin.models import Comment, Product, Category, Crawler
 
     per_page = 100
     total = Comment.query.count()
-    data = Comment.query\
-        .with_entities(Comment.id, Comment.username, Comment.content, Comment.time, Comment.star, Comment.is_member, Product.name, Category.name.label('cate_name'))\
-        .join(Product, Comment.product_id == Product.id) \
+    results = Comment.query\
+        .with_entities(Comment.id, Comment.username, Comment.content, Comment.time, Comment.star, Comment.is_member, Crawler.product_origin, Product.name.label('product_name'), Category.name.label('cate_name'))\
+        .join(Crawler, Comment.crawler_id == Crawler.id) \
+        .join(Product, Crawler.product_id == Product.id) \
         .join(Category, Category.id == Product.cate_id)\
         .order_by(Comment.id).limit(per_page).offset((page - 1) * per_page).all()
     paginate = Comment.query.paginate(page, per_page)
-    print(paginate.has_prev, paginate.has_next)
+
+    # flask_sqlalchemy reuslt->dict
+    data = [dict(zip(result.keys(), result)) for result in results]
+
+    for item in data:
+        item['time'] = 0 if item['time'] == '' else item['time']
+        item['time_str'] = datetime.datetime.utcfromtimestamp(int(item['time'])).strftime('%Y-%m-%d %H:%M:%S')
+        item['is_member_str'] = '是' if item['is_member'] == 1 else '否'
 
     return render_template('admin/comment_list.html',
                            total=total,
@@ -175,21 +236,29 @@ def comment_list(page=1):
 @app.route('/api/comment/<int:page>')
 def api_info(page=1):
 
-    from search.web.apps.admin.models import Comment, Product, Category
-    per_page = 10
+    from search.web.apps.admin.models import Comment, Product, Category, Crawler
 
+    per_page = 100
     total = Comment.query.count()
-    data = Comment.query \
-        .with_entities(Comment.id, Comment.username, Comment.content, Comment.time, Comment.star, Comment.is_member, Product.name, Category.name.label('cate_name')) \
-        .join(Product, Comment.product_id == Product.id) \
+    results = Comment.query \
+        .with_entities(Comment.id, Comment.username, Comment.content, Comment.time, Comment.star, Comment.is_member, Crawler.product_origin, Product.name.label('product_name'), Category.name.label('cate_name')) \
+        .join(Crawler, Comment.crawler_id == Crawler.id) \
+        .join(Product, Crawler.product_id == Product.id) \
         .join(Category, Category.id == Product.cate_id) \
         .order_by(Comment.id).limit(per_page).offset((page - 1) * per_page).all()
+    paginate = Comment.query.paginate(page, per_page)
 
-    # json_data = utils.orm_to_json(data)
-    json_data = data
+    # flask_sqlalchemy reuslt->dict
+    data = [dict(zip(result.keys(), result)) for result in results]
 
-    result = {'total':total, 'data':json_data}
-    return jsonify(result)
+    for item in data:
+        item['time'] = 0 if item['time'] == '' else item['time']
+        item['time_str'] = datetime.datetime.utcfromtimestamp(int(item['time'])).strftime('%Y-%m-%d %H:%M:%S')
+        item['is_member_str'] = '是' if item['is_member'] == 1 else '否'
+
+    json_data = {'total':total, 'data':data}
+
+    return jsonify(json_data)
 
 
 if __name__ == '__main__':

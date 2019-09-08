@@ -91,15 +91,15 @@ class Product(BaseModel):
 class Comment(BaseModel):
     __tablename__ = "comment"
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    product_id = db.Column(db.Integer)
+    crawler_id = db.Column(db.Integer)
     username = db.Column(db.String(20), default='')
     content = db.Column(db.Text(), default='')
     time = db.Column(db.Integer)
     is_member = db.Column(db.Integer(), default=0)
     star = db.Column(db.Integer(), default=0)
 
-    def __init__(self, product_id, username, content, time, is_member, star):
-        self.product_id = product_id
+    def __init__(self, crawler_id, username, content, time, is_member, star):
+        self.crawler_id = crawler_id
         self.username = username
         self.content = content
         self.time = time
@@ -110,19 +110,22 @@ class Comment(BaseModel):
 class Crawler(BaseModel):
     __tablename__ = "crawler"
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    product_id = db.Column(db.Integer)
+    product_id = db.Column(db.Integer, default=0)
     # 同一个产品涉及多个网站
     product_origin = db.Column(db.String(20), default='')
     product_website = db.Column(db.String(100), default='')
-    starttime = db.Column(db.Integer)
-    endtime = db.Column(db.Integer)
-    schedule = db.Column(db.String(80), default='')
+    starttime = db.Column(db.Integer, default=0)
+    endtime = db.Column(db.Integer, default=0)
+    schedule = db.Column(db.Integer, default=0)
     fields = db.Column(db.Text(), default='')
+    is_use = db.Column(db.Integer, default=1)
 
-    def __init__(self, product_id, product_website, starttime, endtime, schedule, fields):
+    def __init__(self, product_id, product_origin, product_website, starttime, endtime, schedule, fields, is_use):
         self.product_id = product_id
+        self.product_origin = product_origin
         self.product_website = product_website
         self.starttime = starttime
         self.endtime = endtime
         self.schedule = schedule
         self.fields = fields
+        self.is_use = is_use
