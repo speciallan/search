@@ -8,7 +8,7 @@ from search.web.server import db
 
 class BaseModel(db.Model):
 
-    __abstract__=True  ##加了该属性后生成表的时候不会生成该表
+    __abstract__= True  ##加了该属性后生成表的时候不会生成该表
     _include_fields = []
 
     # 单个对象方法1

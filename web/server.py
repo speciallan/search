@@ -25,6 +25,9 @@ from search.web import database
 db = SQLAlchemy(app)
 db.init_app(app)
 
+# 初始化任务
+from search.web import task
+
 
 @app.route('/login', methods = ['GET', 'POST'])
 def login():
@@ -238,7 +241,7 @@ def api_info(page=1):
 
     from search.web.apps.admin.models import Comment, Product, Category, Crawler
 
-    per_page = 100
+    per_page = 20
     total = Comment.query.count()
     results = Comment.query \
         .with_entities(Comment.id, Comment.username, Comment.content, Comment.time, Comment.star, Comment.is_member, Crawler.product_origin, Product.name.label('product_name'), Category.name.label('cate_name')) \

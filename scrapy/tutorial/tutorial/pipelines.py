@@ -16,6 +16,7 @@ class TutorialPipeline(object):
 
 
 class CommentPipeline(object):
+    """针对每一个items里面的对象"""
 
     def __init__(self):
         self.file = codecs.open("mydata1.json", "wb", encoding="utf-8")
@@ -64,3 +65,5 @@ class CommentPipeline(object):
     def close_spider(self, spider):
         self.file.close()
         print('爬虫结束了...')
+
+
