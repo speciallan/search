@@ -58,6 +58,7 @@ class CommentTaskSpider(scrapy.Spider):
     def parse(self, response):
 
         item = CommentItem()
+
         id = str(response.url).strip().split("id=")[-1]
         # 用户名
         item["username"] = response.xpath("//div[@class='i-item']/@data-nickname").extract()
@@ -67,6 +68,11 @@ class CommentTaskSpider(scrapy.Spider):
         item["time"] = response.xpath("//div[@class='i-item']/div[@class='o-topic']/span[@class='date-comment']/a/text()").extract()
         # 评论内容
         item["content"] = response.xpath("//div[@class='comment-content']/dl/dd/text()").extract()
+        # 星星
+        item["star"] = response.xpath("//div[@class='i-item']/div[@class='o-topic']/span[contains(@class, 'star')]").extract()
+        # 会员
+        item["is_member"] = response.xpath("//div[@class='user']").extract()
+        # item["is_member"] = response.xpath("//div[@class='user']/span[@class='u-level']/span[1]/text()").extract()
 
         return item
 

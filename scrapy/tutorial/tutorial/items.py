@@ -26,3 +26,5 @@ class CommentItem(scrapy.Item):
     comment_num = scrapy.Field()
     time = scrapy.Field()
     content = scrapy.Field()
+    star = scrapy.Field()
+    is_member = scrapy.Field()

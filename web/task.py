@@ -82,7 +82,7 @@ def write_to_datebase():
     for k,v in enumerate(body):
         item = json.loads(v)
         comment_time = time.mktime(time.strptime(item['time'], "%Y-%m-%d %H:%M"))
-        insert = Comment(item['crawler_id'], item['username'], item['content'], comment_time, 0, 0)
+        insert = Comment(item['crawler_id'], item['username'], item['content'], comment_time, item['star'], item['is_member'])
         db.session.add(insert)
     db.session.commit()
 
@@ -98,6 +98,6 @@ def write_to_datebase():
 sched = ScheduleFactory.get_instance()
 # sched.add_job(crawl_to_file, trigger='interval', id='crawl_to_file', seconds=3)
 # sched.add_job(write_to_datebase, trigger='interval', id='write_to_db', seconds=1)
-sched.add_job(crawl_to_file, trigger='cron', id='crawl_to_file', day_of_week='*', hour=0, minute=0)
-sched.add_job(write_to_datebase, trigger='cron', id='write_to_db', day_of_week='*', hour=2, minute=0)
+sched.add_job(crawl_to_file, trigger='cron', id='crawl_to_file_cron', day_of_week='*', hour=0, minute=0)
+sched.add_job(write_to_datebase, trigger='cron', id='write_to_db_cron', day_of_week='*', hour=2, minute=0)
 sched.start()

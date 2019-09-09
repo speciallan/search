@@ -45,6 +45,19 @@ class CommentPipeline(object):
             else:
                 continue
 
+        # 处理星星
+        for i in range(len(item['star'])):
+            # result = re.match(r'sa(\d+)', item["star"][i])
+            result = re.findall(r'\d+', item['star'][i])[0]
+            item['star'][i] = int(result)
+
+        # 处理会员
+        for i in range(len(item['is_member'])):
+            if '会员' in item['is_member'][i]:
+                item['is_member'][i] = 1
+            else:
+                item['is_member'][i] = 0
+
         # 写json
         for j in range(0, len(item["username"])):
 
@@ -52,11 +65,15 @@ class CommentPipeline(object):
             username = item["username"][j]
             time = item["time"][j]
             content = item["content"][j]
+            star = item["star"][j]
+            is_member = item["is_member"][j]
 
             goods1 = {"crawler_id":crawler_id,
                       "username": username,
                       "time":time,
-                      "content": content}
+                      "content": content,
+                      'star': star,
+                      'is_member': is_member}
 
             i = json.dumps(dict(goods1), ensure_ascii=False)
             line = i + '\n'

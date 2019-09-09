@@ -32,6 +32,7 @@ data = [{"username": "不***子", "content": "用了一段时间过来评论了�
  {"username": "DXWTWL", "content": "以前都是用vivo的，现在用华为感觉挺流畅的"},
  {"username": "j***1", "content": "此用户未填写评价内容"}]
 
+
 # for i in data:
 #     insert = Comment(1, i['username'], i['content'], '', 0, 0)
 #     db.session.add(insert)

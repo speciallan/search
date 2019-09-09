@@ -12,6 +12,7 @@ from flask import Flask, request, render_template, url_for, redirect, jsonify, m
 from flask_sqlalchemy import SQLAlchemy
 from search.web import config
 from search.web import utils
+from flask_cors import CORS
 
 app = Flask(__name__,
             template_folder='templates',
@@ -30,6 +31,9 @@ from search.web import prepare
 
 # 初始化任务
 from search.web import task
+
+# r'/*' 是通配符，让本服务器所有的 URL 都允许跨域请求
+CORS(app, resources=r'/*')
 
 
 @app.route('/login', methods = ['GET', 'POST'])
