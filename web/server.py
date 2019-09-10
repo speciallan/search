@@ -241,20 +241,74 @@ def comment_list(page=1):
                            paginate=paginate)
 
 
-
-@app.route('/api/comment', methods = ['GET'])
-@app.route('/api/comment/<int:page>')
-def api_info(page=1):
+@app.route('/api/category', methods = ['GET'])
+@app.route('/api/category/<int:page>')
+def api_category(page=1):
 
     from search.web.apps.admin.models import Comment, Product, Category, Crawler
 
     per_page = 20
-    total = Comment.query.count()
+    total = Category.query.count()
+
+    results = Category.query \
+        .with_entities(Category.id, Category.name) \
+        .order_by(Category.id).limit(per_page).offset((page - 1) * per_page).all()
+
+    # flask_sqlalchemy reuslt->dict
+    data = [dict(zip(result.keys(), result)) for result in results]
+
+    json_data = {'total':total, 'data':data}
+
+    return jsonify(json_data)
+
+
+@app.route('/api/product', methods = ['GET'])
+@app.route('/api/product/<int:cid>')
+@app.route('/api/product/<int:cid>/<int:page>')
+def api_product(cid=1, page=1):
+
+    from search.web.apps.admin.models import Comment, Product, Category, Crawler
+
+    per_page = 20
+    total = Product.query \
+        .join(Category, Category.id == Product.cate_id) \
+        .filter(Category.id == cid) \
+        .count()
+
+    results = Product.query \
+        .with_entities(Product.id, Product.name, Product.title) \
+        .join(Category, Category.id == Product.cate_id) \
+        .filter(Category.id == cid) \
+        .order_by(Product.id).limit(per_page).offset((page - 1) * per_page).all()
+
+    # flask_sqlalchemy reuslt->dict
+    data = [dict(zip(result.keys(), result)) for result in results]
+
+    json_data = {'total':total, 'data':data}
+
+    return jsonify(json_data)
+
+
+@app.route('/api/comment', methods = ['GET'])
+@app.route('/api/comment/<int:pid>')
+@app.route('/api/comment/<int:pid>/<int:page>')
+def api_comment(pid=1, page=1):
+
+    from search.web.apps.admin.models import Comment, Product, Category, Crawler
+
+    per_page = 20
+    total = Comment.query \
+        .join(Crawler, Comment.crawler_id == Crawler.id) \
+        .join(Product, Crawler.product_id == Product.id) \
+        .filter(Product.id == pid) \
+        .count()
+
     results = Comment.query \
         .with_entities(Comment.id, Comment.username, Comment.content, Comment.time, Comment.star, Comment.is_member, Crawler.product_origin, Product.name.label('product_name'), Category.name.label('cate_name')) \
         .join(Crawler, Comment.crawler_id == Crawler.id) \
         .join(Product, Crawler.product_id == Product.id) \
         .join(Category, Category.id == Product.cate_id) \
+        .filter(Product.id == pid) \
         .order_by(Comment.id).limit(per_page).offset((page - 1) * per_page).all()
     paginate = Comment.query.paginate(page, per_page)
 
