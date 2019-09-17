@@ -14,17 +14,19 @@ class CommentSpider(scrapy.Spider):
     comment_page = 20 # <=50
 
     # 打开存放链接得txt文件
-    links = open("product_url.txt")
+    links = open("product_phone_url.txt")
     link = links.readlines()
     link = link[:classes]
 
     start_urls = []
     # 从商品链接中提取商品id，并构造评论页url
     for i in range(0, len(link)):
-        pattern = r'(\d+)\.html$'
+        pattern = r'(\d+)\.html---(.*)'
         # 这里我们读取的评论是单个手机的评论
         # 可以改变link[]的下标索引来读取不同的手机的评论
-        id = re.findall(pattern, link[i])
+        match = re.findall(pattern, link[i])[0]
+        id, title = match
+
         # 得到评论数
         commentUrl = "https://club.jd.com/comment/productCommentSummaries.action?referenceIds=" + str(id[0])
         commentData = urllib.request.urlopen(commentUrl).read().decode("utf-8", "ignore")
@@ -41,6 +43,7 @@ class CommentSpider(scrapy.Spider):
 
         for j in range(1, comment_page_num + 1):
             url = "http://club.jd.com/review/" + str(id[0]) + "-1-" + str(j) + "-0.html"
+            url += '?id={}'.format(crawler_ids[i])
             start_urls.append(url)
 
         # print(start_urls)
@@ -48,12 +51,20 @@ class CommentSpider(scrapy.Spider):
     def parse(self, response):
 
         item = CommentItem()
+        id = str(response.url).strip().split("id=")[-1]
         # 用户名
         item["username"] = response.xpath("//div[@class='i-item']/@data-nickname").extract()
+        # crawler_id
+        item['crawler_id'] = [id for i in range(len(item['username']))]
         # 评论时间
         item["time"] = response.xpath("//div[@class='i-item']/div[@class='o-topic']/span[@class='date-comment']/a/text()").extract()
         # 评论内容
         item["content"] = response.xpath("//div[@class='comment-content']/dl/dd/text()").extract()
+        # 星星
+        item["star"] = response.xpath("//div[@class='i-item']/div[@class='o-topic']/span[contains(@class, 'star')]").extract()
+        # 会员
+        item["is_member"] = response.xpath("//div[@class='user']").extract()
+        # item["is_member"] = response.xpath("//div[@class='user']/span[@class='u-level']/span[1]/text()").extract()
 
         return item
 
