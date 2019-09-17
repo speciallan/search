@@ -1,0 +1,5 @@
+flask_sqlalchemy
+flask_cors
+elasticsearch==5.0.0
+apscheduler
+scrapy
