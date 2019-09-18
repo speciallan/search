@@ -82,19 +82,19 @@ fields = {"username":"//div[@class='i-item']/@data-nicknam",
 """
 
 
-links = open("../scrapy/tutorial/tutorial/spiders/product_phone_url.txt")
-link = links.readlines()
-for i in link:
-    re = i.split('---')
-    if len(re) < 2:
-        break
-    website, title = re
-    # print(i['title'][:10], 1, i['title'])
-    insert = Product(title[:10], 1, title)
-    db.session.add(insert)
-    db.session.flush()
-    # print(insert.id)
-    # break
-    # insert = Crawler(insert, 'jd', website)
-    # db.session.add(insert)
-db.session.commit()
+# links = open("../scrapy/tutorial/tutorial/spiders/product_phone_url.txt")
+# link = links.readlines()
+# for i in link:
+#     re = i.split('---')
+#     if len(re) < 2:
+#         break
+#     website, title = re
+#     # print(i['title'][:10], 1, i['title'])
+#     insert = Product(title[:10], 1, title)
+#     db.session.add(insert)
+#     db.session.flush()
+#     # print(insert.id)
+#     # break
+#     # insert = Crawler(insert, 'jd', website)
+#     # db.session.add(insert)
+# db.session.commit()
