@@ -375,15 +375,18 @@ def api_search(keywords='', page=1):
         .join(Product, Product.id == Crawler.product_id) \
         .filter(Comment.content.like(f'%{keywords}%')) \
         .count()
+    print(total)
 
+    # 这里product.name不能写在comment前面
     results = Comment.query \
-        .with_entities(Product.id.label('product_id'), Product.name, Product.title, Comment.id.label('comment_id'), Comment.content, Comment.username, Comment.time, Comment.is_member, Comment.star) \
+        .with_entities(Comment.id.label('comment_id'), Comment.content, Comment.username, Comment.time, Comment.is_member, Comment.star, Product.id.label('product_id'), Product.name, Product.title) \
         .join(Crawler, Crawler.id == Comment.crawler_id) \
         .join(Product, Product.id == Crawler.product_id) \
         .filter(Comment.content.like(f'%{keywords}%')) \
         .order_by(Comment.time.desc()).limit(per_page).offset((page - 1) * per_page).all()
+    # .join(Product, Product.id == Crawler.product_id) \
 
-    # flask_sqlalchemy reuslt->dict
+# flask_sqlalchemy reuslt->dict
     data = [dict(zip(result.keys(), result)) for result in results]
 
     json_data = {'total':total, 'data':data}
