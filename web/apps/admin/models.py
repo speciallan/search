@@ -129,3 +129,13 @@ class Crawler(BaseModel):
         self.schedule = schedule
         self.fields = fields
         self.is_use = is_use
+
+
+class Origin(BaseModel):
+    __tablename__ = 'origin'
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    name = db.Column(db.String(20), default='')
+
+    def __init__(self, name):
+        self.name = name
+
