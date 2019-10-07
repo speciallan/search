@@ -80,12 +80,18 @@ class Product(BaseModel):
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     name = db.Column(db.String(20), default='')
     cate_id = db.Column(db.Integer)
+    brand = db.Column(db.String(20), default='')
     title = db.Column(db.String(100), default='')
+    price = db.Column(db.Float, default=0)
+    comment_str = db.Column(db.String(20), default='')
 
-    def __init__(self, name, cate_id, title):
+    def __init__(self, name, cate_id, brand, title, price, comment_str):
         self.name = name
         self.cate_id = cate_id
+        self.brand = brand
         self.title = title
+        self.price = price
+        self.comment_str = comment_str
 
 
 class Comment(BaseModel):
@@ -133,6 +139,17 @@ class Crawler(BaseModel):
 
 class Origin(BaseModel):
     __tablename__ = 'origin'
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    name = db.Column(db.String(20), default='')
+    site = db.Column(db.String(100), default='')
+
+    def __init__(self, name, site):
+        self.name = name
+        self.site = site
+
+
+class Brand(BaseModel):
+    __tablename__ = 'brand'
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     name = db.Column(db.String(20), default='')
 

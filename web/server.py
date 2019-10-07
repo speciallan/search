@@ -191,9 +191,12 @@ def product_add():
         from search.web.apps.admin.models import Product
         name = request.form.get('name')
         cate_id = request.form.get('cate_id')
+        brand = request.form.get('brand')
         title = request.form.get('title')
+        price = request.form.get('price')
+        comment_str = request.form.get('comment_str')
 
-        product = Product(name, cate_id, title)
+        product = Product(name, cate_id, brand, title, price, comment_str)
         db.session.add(product)
         db.session.commit()
         return redirect('product/list')
@@ -205,7 +208,7 @@ def product_list(page=1):
     from search.web.apps.admin.models import Product, Category
     per_page = 100
     total = Product.query.count()
-    data = Product.query.with_entities(Product.id, Product.name, Product.title, Category.name.label('cate_name'))\
+    data = Product.query.with_entities(Product.id, Product.name, Product.brand, Product.title, Product.price, Product.comment_str, Category.name.label('cate_name'))\
         .join(Category, Product.cate_id == Category.id)\
         .order_by(Product.id).limit(per_page).offset((page - 1) * per_page).all()
 
