@@ -5,9 +5,10 @@
 from search.web.apps.admin.models import Crawler
 import json
 
-results = Crawler.query.with_entities(Crawler.id, Crawler.product_website, Crawler.fields) \
+results = Crawler.query.with_entities(Crawler.id, Crawler.website, Crawler.fields) \
     .filter(Crawler.is_use == 1) \
-    .order_by(Crawler.id).all()
+    .order_by(Crawler.id)\
+    .all()
 
 # flask_sqlalchemy reuslt->dict
 config = [dict(zip(result.keys(), result)) for result in results]

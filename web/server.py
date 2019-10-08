@@ -125,11 +125,12 @@ def crawler_add():
 @app.route('/crawler/list')
 @app.route('/crawler/list/<int:page>', methods=['GET', 'POST'])
 def crawler_list(page=1):
-    from search.web.apps.admin.models import Crawler, Product
+    from search.web.apps.admin.models import Crawler, Product, Origin
 
     per_page = 100
     total = Crawler.query.count()
-    results = Crawler.query.with_entities(Crawler.id, Crawler.product_website, Crawler.product_origin, Crawler.starttime, Crawler.endtime, Crawler.schedule, Crawler.fields, Crawler.is_use, Product.name.label('product_name'))\
+    results = Crawler.query.with_entities(Crawler.id, Crawler.website, Crawler.origin_id, Crawler.starttime, Crawler.endtime, Crawler.schedule, Crawler.fields, Crawler.is_use, Origin.name.label('origin_name'), Product.name.label('product_name'))\
+        .join(Origin, Crawler.origin_id == Origin.id) \
         .join(Product, Crawler.product_id == Product.id)\
         .order_by(Crawler.id).limit(per_page).offset((page - 1) * per_page).all()
     paginate = Crawler.query.paginate(page, per_page)
@@ -223,13 +224,14 @@ def product_list(page=1):
 @app.route('/comment/list/<int:page>')
 def comment_list(page=1):
 
-    from search.web.apps.admin.models import Comment, Product, Category, Crawler
+    from search.web.apps.admin.models import Comment, Product, Category, Crawler, Origin
 
     per_page = 100
     total = Comment.query.count()
     results = Comment.query\
-        .with_entities(Comment.id, Comment.username, Comment.content, Comment.time, Comment.star, Comment.is_member, Crawler.product_origin, Product.name.label('product_name'), Category.name.label('cate_name'))\
+        .with_entities(Comment.id, Comment.username, Comment.content, Comment.time, Comment.star, Comment.is_member, Origin.name.label('origin_name'), Product.name.label('product_name'), Category.name.label('cate_name'))\
         .join(Crawler, Comment.crawler_id == Crawler.id) \
+        .join(Origin, Crawler.origin_id == Origin.id) \
         .join(Product, Crawler.product_id == Product.id) \
         .join(Category, Category.id == Product.cate_id)\
         .order_by(Comment.id).limit(per_page).offset((page - 1) * per_page).all()

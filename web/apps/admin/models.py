@@ -118,18 +118,18 @@ class Crawler(BaseModel):
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     product_id = db.Column(db.Integer, default=0)
     # 同一个产品涉及多个网站
-    product_origin = db.Column(db.String(20), default='')
-    product_website = db.Column(db.String(100), default='')
+    origin_id = db.Column(db.Integer, default=0)
+    website = db.Column(db.String(100), default='')
     starttime = db.Column(db.Integer, default=0)
     endtime = db.Column(db.Integer, default=0)
     schedule = db.Column(db.Integer, default=0)
     fields = db.Column(db.Text(), default='')
     is_use = db.Column(db.Integer, default=1)
 
-    def __init__(self, product_id, product_origin, product_website, starttime, endtime, schedule, fields, is_use):
+    def __init__(self, product_id, origin_id, website, starttime, endtime, schedule, fields, is_use):
         self.product_id = product_id
-        self.product_origin = product_origin
-        self.product_website = product_website
+        self.origin_id = origin_id
+        self.website = website
         self.starttime = starttime
         self.endtime = endtime
         self.schedule = schedule
