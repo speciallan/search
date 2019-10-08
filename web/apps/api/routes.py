@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 # -*- coding:utf-8 -*-
 # Author:Speciallan
 
@@ -193,11 +192,3 @@ def api_search_comment(keywords='', page=1):
         .join(Crawler, Crawler.id == Comment.crawler_id) \
         .join(Product, Product.id == Crawler.product_id) \
         .filter(Comment.content.like(f'%{keywords}%')) \
-        .order_by(Comment.time.desc()).limit(per_page).offset((page - 1) * per_page).all()
-
-    # flask_sqlalchemy reuslt->dict
-    data = [dict(zip(result.keys(), result)) for result in results]
-
-    json_data = {'total':total, 'data':data}
-
-    return jsonify(json_data)
