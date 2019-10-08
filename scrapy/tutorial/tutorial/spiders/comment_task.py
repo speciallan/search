@@ -22,6 +22,7 @@ class CommentTaskSpider(scrapy.Spider):
     content = file.readlines()[0]
     content = json.loads(content)
 
+    print(content)
     link, crawler_ids = [], []
     for k,v in enumerate(content):
         link.append(v['product_website'])

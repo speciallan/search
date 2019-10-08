@@ -75,9 +75,10 @@ def admin():
 @app.route('/crawler/add', methods = ['GET', 'POST'])
 def crawler_add():
     if request.method == "GET":
-        from search.web.apps.admin.models import Product
+        from search.web.apps.admin.models import Product, Origin
         product_list = Product.query.with_entities(Product.id, Product.name).all()
-        origin_list = [{'id':'jd', 'name':'京东'}]
+        origin_list = Origin.query.with_entities(Origin.id, Origin.name).all()
+
         return render_template('admin/crawler_add.html',
                                product_list=product_list,
                                origin_list=origin_list)

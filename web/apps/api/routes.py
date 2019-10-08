@@ -165,13 +165,13 @@ def api_comment(pid=1, page=1):
 
     return jsonify(json_data)
 
-@api.route('/search', methods = ['GET', 'POST'])
+@api.route('/search/product', methods = ['GET', 'POST'])
 @api.route('/search/product/<string:keywords>')
 @api.route('/search/product/<string:keywords>/<int:page>')
 def api_search_product(keywords='', page=1):
     pass
 
-@api.route('/search', methods = ['GET', 'POST'])
+@api.route('/search/comment/', methods = ['GET', 'POST'])
 @api.route('/search/comment/<string:keywords>')
 @api.route('/search/comment/<string:keywords>/<int:page>')
 def api_search_comment(keywords='', page=1):

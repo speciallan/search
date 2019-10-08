@@ -11,9 +11,13 @@ class ProductSpider(scrapy.Spider):
     name = "product"
     # allowed_domains = ["jd.com"]
 
-    def __init__(self, cateid=1, originid=1, *args, **kwargs):
+    cates = {'1':'手机', '2':'计算机'}
+    origins = {'1':'"https://search.jd.com/Search?keyword={}&enc=utf-8&page={}'}
+
+    def __init__(self, cateid, originid, *args, **kwargs):
         super(ProductSpider, self).__init__(*args, **kwargs)
-        self.start_urls = ['http://www.example.com/categories/%s' % category]
+        print(cateid, originid)
+        exit()
 
     start_urls = []
     # 获取前十页的链接

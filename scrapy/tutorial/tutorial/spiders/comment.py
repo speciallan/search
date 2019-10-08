@@ -43,7 +43,6 @@ class CommentSpider(scrapy.Spider):
 
         for j in range(1, comment_page_num + 1):
             url = "http://club.jd.com/review/" + str(id[0]) + "-1-" + str(j) + "-0.html"
-            url += '?id={}'.format(crawler_ids[i])
             start_urls.append(url)
 
         # print(start_urls)
