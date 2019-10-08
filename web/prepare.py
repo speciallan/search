@@ -21,3 +21,5 @@ file.close()
 
 # url = 'https://item.jd.com/100004404916.html?id=1'
 # print(url.strip().split('id=')[-1])
+
+
