@@ -8,6 +8,7 @@
 import codecs
 import json
 import re
+from .items import ProductItem
 
 
 class TutorialPipeline(object):
@@ -23,6 +24,10 @@ class CommentPipeline(object):
 
     def process_item(self, item, spider):
 
+        if isinstance(item, ProductItem):
+            return item
+
+        # 评论pipeline
         count = 0
 
         # print('len:', len(item['time']), len(item['content']))
@@ -61,14 +66,17 @@ class CommentPipeline(object):
         # 写json
         for j in range(0, len(item["username"])):
 
-            crawler_id = item["crawler_id"][j]
+            # crawler_id = item["crawler_id"][j]
+            goods_id = item["goods_id"][j]
             username = item["username"][j]
             time = item["time"][j]
             content = item["content"][j]
             star = item["star"][j]
             is_member = item["is_member"][j]
 
-            goods1 = {"crawler_id":crawler_id,
+            goods1 = {
+                # "crawler_id":crawler_id,
+                      "goods_id": goods_id,
                       "username": username,
                       "time":time,
                       "content": content,

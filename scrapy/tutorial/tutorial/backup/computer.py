@@ -2,18 +2,18 @@
 
 import scrapy
 
-from ..items import JdPhoneItem
+from search.scrapy.tutorial.tutorial.items import JdPhoneItem
 import re
 
 
-class JdPhoneSpider(scrapy.Spider):
+class JdPcSpider(scrapy.Spider):
 
-    name = "jd_phone"
+    name = "jd_pc"
     allowed_domains = ["jd.com"]
     start_urls = []
     # 获取前十页的链接
     for i in range(1, 11):
-        url = "https://search.jd.com/Search?keyword=手机&enc=utf-8&page=" + str(2 * i - 1)
+        url = "https://search.jd.com/Search?keyword=笔记本&enc=utf-8&page=" + str(2 * i - 1)
         start_urls.append(url)
 
     # 获取商品的链接，标题，价格
@@ -36,7 +36,7 @@ class JdPhoneSpider(scrapy.Spider):
             if (bool):
                 continue
             else:
-                with open('product_phone_url.txt', 'a') as f:
+                with open('product_pc_url.txt', 'a') as f:
                     f.write(item["url"][i] + '---' + item['title'][i] + '\n')
         return item
 

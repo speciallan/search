@@ -19,9 +19,18 @@ class JdPhoneItem(scrapy.Item):
     title = scrapy.Field()  # 商品标题
     price = scrapy.Field()  # 商品价格
 
+class ProductItem(scrapy.Item):
+
+    goods_id = scrapy.Field()
+    url = scrapy.Field()
+    title = scrapy.Field()
+    price = scrapy.Field()
+    photo = scrapy.Field()
+
 class CommentItem(scrapy.Item):
 
     crawler_id = scrapy.Field()
+    goods_id = scrapy.Field()
     username = scrapy.Field()
     comment_num = scrapy.Field()
     time = scrapy.Field()
