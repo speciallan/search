@@ -182,6 +182,40 @@ def category_list(page=1):
                            paginate=paginate)
 
 
+@app.route('/attribute/add', methods = ['GET', 'POST'])
+def attribute_add():
+    if request.method == "GET":
+        from search.web.apps.admin.models import Category
+        category_list = Category.query.all()
+        return render_template('admin/attribute_add.html', category_list=category_list)
+
+    elif request.method == "POST":
+        from search.web.apps.admin.models import Attribute
+        cate_id = request.form.get('cate_id')
+        name = request.form.get('name')
+        rule = request.form.get('rule')
+
+        attr = Attribute(cate_id, name, rule)
+        db.session.add(attr)
+        db.session.commit()
+        return redirect('attribute/list')
+
+
+@app.route('/attribute/list')
+@app.route('/attribute/list/<int:page>', methods=['GET', 'POST'])
+def attribute_list(page=1):
+    from search.web.apps.admin.models import Attribute, Category
+    per_page = 100
+    total = Attribute.query.count()
+    data = Attribute.query.with_entities(Attribute.id, Attribute.name, Attribute.rule, Category.name.label('cate_name')) \
+        .join(Category, Attribute.cate_id == Category.id) \
+        .order_by(Attribute.id).limit(per_page).offset((page - 1) * per_page).all()
+
+    return render_template('admin/attribute_list.html',
+                           total=total,
+                           data=data)
+
+
 @app.route('/product/add', methods = ['GET', 'POST'])
 def product_add():
     if request.method == "GET":
@@ -191,14 +225,15 @@ def product_add():
 
     elif request.method == "POST":
         from search.web.apps.admin.models import Product
+        goods_id = request.form.get('goods_id')
         name = request.form.get('name')
         cate_id = request.form.get('cate_id')
         brand = request.form.get('brand')
         title = request.form.get('title')
         price = request.form.get('price')
-        comment_str = request.form.get('comment_str')
+        comment_num = request.form.get('comment_num')
 
-        product = Product(name, cate_id, brand, title, price, comment_str)
+        product = Product(goods_id, name, cate_id, brand, title, price, comment_num)
         db.session.add(product)
         db.session.commit()
         return redirect('product/list')
@@ -210,7 +245,7 @@ def product_list(page=1):
     from search.web.apps.admin.models import Product, Category
     per_page = 100
     total = Product.query.count()
-    data = Product.query.with_entities(Product.id, Product.name, Product.brand, Product.title, Product.price, Product.comment_str, Category.name.label('cate_name'))\
+    data = Product.query.with_entities(Product.id, Product.goods_id, Product.name, Product.brand, Product.title, Product.price, Product.comment_num, Category.name.label('cate_name'))\
         .join(Category, Product.cate_id == Category.id)\
         .order_by(Product.id).limit(per_page).offset((page - 1) * per_page).all()
 

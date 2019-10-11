@@ -75,23 +75,40 @@ class Category(BaseModel):
         self.name = name
 
 
+class Attribute(BaseModel):
+    __tablename__ = "attribute"
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    cate_id = db.Column(db.Integer, default=0)
+    name = db.Column(db.String(100), default='')
+    rule = db.Column(db.String(100), default='')
+
+    def __init__(self, cate_id, name, rule):
+        self.cate_id = cate_id
+        self.name = name
+        self.rule = rule
+
+
 class Product(BaseModel):
     __tablename__ = "product"
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    goods_id = db.Column(db.String(20), default='')
     name = db.Column(db.String(20), default='')
     cate_id = db.Column(db.Integer)
     brand = db.Column(db.String(20), default='')
     title = db.Column(db.String(100), default='')
     price = db.Column(db.Float, default=0)
-    comment_str = db.Column(db.String(20), default='')
+    comment_num = db.Column(db.Integer, default=0)
+    photo = db.Column(db.String(255), default='')
 
-    def __init__(self, name, cate_id, brand, title, price, comment_str):
+    def __init__(self, goods_id, name, cate_id, brand, title, price, comment_num, photo):
+        self.goods_id = goods_id
         self.name = name
         self.cate_id = cate_id
         self.brand = brand
         self.title = title
         self.price = price
-        self.comment_str = comment_str
+        self.comment_num = comment_num
+        self.photo = photo
 
 
 class Comment(BaseModel):
@@ -103,14 +120,16 @@ class Comment(BaseModel):
     time = db.Column(db.Integer)
     is_member = db.Column(db.Integer(), default=0)
     star = db.Column(db.Integer(), default=0)
+    avater = db.Column(db.String(255), default='')
 
-    def __init__(self, crawler_id, username, content, time, is_member, star):
+    def __init__(self, crawler_id, username, content, time, is_member, star, avater):
         self.crawler_id = crawler_id
         self.username = username
         self.content = content
         self.time = time
         self.is_member = is_member
         self.star = star
+        self.avater = avater
 
 
 class Crawler(BaseModel):

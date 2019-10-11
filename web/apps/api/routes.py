@@ -100,14 +100,14 @@ def api_product_emotion(product_id=1):
     from search.web.apps.admin.models import Comment, Product, Category, Crawler
 
     data = [
-        {'product_name':'华为P30', 'date':'2019-09-09', 'index':0.6},
-        {'product_name':'华为P30', 'date':'2019-09-10', 'index':0.4},
-        {'product_name':'华为P30', 'date':'2019-09-11', 'index':0.2},
-        {'product_name':'华为P30', 'date':'2019-09-12', 'index':-0.4},
-        {'product_name':'华为P30', 'date':'2019-09-13', 'index':-0.8},
-        {'product_name':'华为P30', 'date':'2019-09-14', 'index':0.8},
-        {'product_name':'华为P30', 'date':'2019-09-15', 'index':0.2},
-        {'product_name':'华为P30', 'date':'2019-09-16', 'index':0.4},
+        {'product_name':'华为P30', 'date':'2019-09-09', 'attr':{'电池容量':0.6, '摄像头':0.3, '接口类型':0.3, '网络支持':0.5, '存储容量':0.8, '屏幕大小':-0.3}},
+        {'product_name':'华为P30', 'date':'2019-09-10', 'attr':{'电池容量':0.6, '摄像头':0.3, '接口类型':0.3, '网络支持':0.5, '存储容量':0.8, '屏幕大小':-0.3}},
+        {'product_name':'华为P30', 'date':'2019-09-11', 'attr':{'电池容量':0.6, '摄像头':0.3, '接口类型':0.3, '网络支持':0.5, '存储容量':0.8, '屏幕大小':-0.3}},
+        {'product_name':'华为P30', 'date':'2019-09-12', 'attr':{'电池容量':0.6, '摄像头':0.3, '接口类型':0.3, '网络支持':0.5, '存储容量':0.8, '屏幕大小':-0.3}},
+        {'product_name':'华为P30', 'date':'2019-09-13', 'attr':{'电池容量':0.6, '摄像头':0.3, '接口类型':0.3, '网络支持':0.5, '存储容量':0.8, '屏幕大小':-0.3}},
+        {'product_name':'华为P30', 'date':'2019-09-14', 'attr':{'电池容量':0.6, '摄像头':0.3, '接口类型':0.3, '网络支持':0.5, '存储容量':0.8, '屏幕大小':-0.3}},
+        {'product_name':'华为P30', 'date':'2019-09-15', 'attr':{'电池容量':0.6, '摄像头':0.3, '接口类型':0.3, '网络支持':0.5, '存储容量':0.8, '屏幕大小':-0.3}},
+        {'product_name':'华为P30', 'date':'2019-09-16', 'attr':{'电池容量':0.6, '摄像头':0.3, '接口类型':0.3, '网络支持':0.5, '存储容量':0.8, '屏幕大小':-0.3}}
     ]
     json_data = {'total':len(data), 'data':data}
     return jsonify(json_data)
@@ -130,26 +130,41 @@ def api_product_emotion(product_id=1):
     return jsonify(json_data)
 
 
-@api.route('/comment', methods = ['GET'])
+@api.route('/comment', methods = ['GET', 'POST'])
 @api.route('/comment/<int:pid>')
-@api.route('/comment/<int:pid>/<int:page>')
-def api_comment(pid=1, page=1):
+@api.route('/comment/<int:pid>/<string:level>')
+@api.route('/comment/<int:pid>/<string:level>/<int:page>')
+def api_comment(pid=1, level='a', page=1):
 
-    from search.web.apps.admin.models import Comment, Product, Category, Crawler
+    from search.web.apps.admin.models import Comment, Product, Category, Crawler, Origin
+
+    star = []
+    if level == 'a':
+        star = [1,2,3,4,5]
+    elif level == 'l':
+        star = [1]
+    elif level == 'm':
+        star = [2,3]
+    elif level == 'h':
+        star = [4,5]
+
 
     per_page = 20
     total = Comment.query \
         .join(Crawler, Comment.crawler_id == Crawler.id) \
         .join(Product, Crawler.product_id == Product.id) \
         .filter(Product.id == pid) \
+        .filter(Comment.star.in_(star)) \
         .count()
 
     results = Comment.query \
-        .with_entities(Comment.id, Comment.username, Comment.content, Comment.time, Comment.star, Comment.is_member, Crawler.product_origin, Product.name.label('product_name'), Category.name.label('cate_name')) \
+        .with_entities(Comment.id, Comment.username, Comment.content, Comment.time, Comment.star, Comment.is_member, Comment.avater, Crawler.origin_id, Origin.name.label('origin_name'), Product.name.label('product_name'), Category.name.label('cate_name')) \
         .join(Crawler, Comment.crawler_id == Crawler.id) \
         .join(Product, Crawler.product_id == Product.id) \
         .join(Category, Category.id == Product.cate_id) \
+        .join(Origin, Origin.id == Crawler.origin_id) \
         .filter(Product.id == pid) \
+        .filter(Comment.star.in_(star)) \
         .order_by(Comment.id).limit(per_page).offset((page - 1) * per_page).all()
     paginate = Comment.query.paginate(page, per_page)
 
@@ -165,11 +180,65 @@ def api_comment(pid=1, page=1):
 
     return jsonify(json_data)
 
-@api.route('/search/product', methods = ['GET', 'POST'])
-@api.route('/search/product/<string:keywords>')
-@api.route('/search/product/<string:keywords>/<int:page>')
+@api.route('/search/product/', methods = ['GET', 'POST'])
+# @api.route('/search/product/<string:keywords>', methods = ['GET', 'POST'])
+# @api.route('/search/product/<string:keywords>/<int:page>')
 def api_search_product(keywords='', page=1):
-    pass
+
+    from search.web.apps.admin.models import Comment, Product, Category
+
+    total = Product.query \
+            .join(Category, Category.id == Product.cate_id) \
+
+    results = Comment.query \
+              .with_entities(Product.id.label('product_id'), Product.goods_id, Product.name, Product.title, Product.price, Product.comment_num, Product.photo, Category.name.label('cate_name')) \
+              .join(Category, Category.id == Product.cate_id) \
+
+    post_data = request.form
+    if 'keywords' in post_data.keys():
+        total = total.filter(Product.title.like(f'%{post_data["keywords"]}%'))
+        results = results.filter(Product.title.like(f'%{post_data["keywords"]}%'))
+
+    if 'cate_id' in post_data.keys():
+        total = total.filter(Product.cate_id == post_data['cate_id'])
+        results = results.filter(Product.cate_id == post_data['cate_id'])
+
+    if 'brand' in post_data.keys():
+        total = total.filter(Product.brand.like(post_data['brand']))
+        results = results.filter(Product.brand.like(post_data['brand']))
+
+    if 'price_min' in post_data.keys() and 'price_max' in post_data.keys():
+        total = total.filter(Product.price >= int(post_data['price_min']))
+        total = total.filter(Product.price <= int(post_data['price_max']))
+        results = results.filter(Product.price >= int(post_data['price_min']))
+        results = results.filter(Product.price <= int(post_data['price_max']))
+
+    if 'order' in post_data.keys():
+        if post_data['order'] == 'comment_asc':
+            results = results.order_by(Product.comment_num.asc())
+        if post_data['order'] == 'comment_desc':
+            results = results.order_by(Product.comment_num.desc())
+        if post_data['order'] == 'sale_asc':
+            results = results.order_by(Product.comment_num.asc())
+        if post_data['order'] == 'sale_desc':
+            results = results.order_by(Product.comment_num.desc())
+        if post_data['order'] == 'price_asc':
+            results = results.order_by(Product.price.asc())
+        if post_data['order'] == 'price_desc':
+            results = results.order_by(Product.price.desc())
+
+    total = total.count()
+
+    # flask_sqlalchemy reuslt->dict
+    data = [dict(zip(result.keys(), result)) for result in results]
+
+    for item in data:
+        item['comment_str'] = '{:.1f}万'.format(item['comment_num'] / 10000)
+
+    json_data = {'total':total, 'data':data}
+
+    return jsonify(json_data)
+
 
 @api.route('/search/comment/', methods = ['GET', 'POST'])
 @api.route('/search/comment/<string:keywords>')
@@ -188,7 +257,13 @@ def api_search_comment(keywords='', page=1):
         .count()
 
     results = Comment.query \
-        .with_entities(Product.id.label('product_id'), Product.name, Product.title, Product.price, Product.comment_str, Comment.id.label('comment_id'), Comment.content, Comment.username, Comment.time, Comment.is_member, Comment.star) \
+        .with_entities(Product.id.label('product_id'), Product.goods_id, Product.name, Product.title, Product.price, Product.comment_num, Comment.id.label('comment_id'), Comment.content, Comment.username, Comment.time, Comment.is_member, Comment.star) \
         .join(Crawler, Crawler.id == Comment.crawler_id) \
         .join(Product, Product.id == Crawler.product_id) \
         .filter(Comment.content.like(f'%{keywords}%')) \
+
+    data = [dict(zip(result.keys(), result)) for result in results]
+
+    json_data = {'total':total, 'data':data}
+
+    return jsonify(json_data)
