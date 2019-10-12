@@ -113,7 +113,7 @@ class CommentPipeline(object):
                       'avater': avater}
 
             i = json.dumps(dict(goods1), ensure_ascii=False)
-            line = i + '\n'
+            line = i + '-----'
             file.write(line)
         file.close()
 

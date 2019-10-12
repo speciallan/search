@@ -29,22 +29,24 @@ def api_category(page=1):
 
 
 @api.route('/product/list', methods = ['GET'])
-@api.route('/product/list/<int:cid>')
-@api.route('/product/list/<int:cid>/<int:page>')
-def api_product(cid=1, page=1):
+@api.route('/product/list/<int:origin_id>/<int:cid>')
+@api.route('/product/list/<int:origin_id>/<int:cid>/<int:page>')
+def api_product(origin_id=1, cid=1, page=1):
 
-    from search.web.apps.admin.models import Comment, Product, Category, Crawler
+    from search.web.apps.admin.models import Category, Product
 
     per_page = 20
+
     total = Product.query \
-        .join(Category, Category.id == Product.cate_id) \
-        .filter(Category.id == cid) \
+        .filter(Product.origin_id == origin_id) \
+        .filter(Product.cate_id == cid) \
         .count()
 
     results = Product.query \
-        .with_entities(Product.id, Product.name, Product.brand, Product.title) \
+        .with_entities(Product.id, Product.origin_id, Product.goods_id, Product.name, Product.brand, Product.title, Product.price, Product.comment_num, Product.photo, Category.name.label('cate_name')) \
         .join(Category, Category.id == Product.cate_id) \
-        .filter(Category.id == cid) \
+        .filter(Product.origin_id == origin_id) \
+        .filter(Product.cate_id == cid) \
         .order_by(Product.id).limit(per_page).offset((page - 1) * per_page).all()
 
     # flask_sqlalchemy reuslt->dict
@@ -56,20 +58,20 @@ def api_product(cid=1, page=1):
 
 
 @api.route('/product/date', methods = ['GET'])
-@api.route('/product/date/<int:product_id>')
-def api_product_date(product_id=1):
+@api.route('/product/date/<int:origin_id>/<string:goods_id>')
+def api_product_date(origin_id=1, goods_id=1):
 
-    from search.web.apps.admin.models import Comment, Product, Category, Crawler
+    from search.web.apps.admin.models import Product, Category, Crawler
 
     data = [
-        {'product_name':'华为P30', 'date':'2019-09-09', 'price':5.00, 'sale': 100},
-        {'product_name':'华为P30', 'date':'2019-09-10', 'price':6.00, 'sale': 120},
-        {'product_name':'华为P30', 'date':'2019-09-11', 'price':5.00, 'sale': 140},
-        {'product_name':'华为P30', 'date':'2019-09-12', 'price':5.50, 'sale': 200},
-        {'product_name':'华为P30', 'date':'2019-09-13', 'price':5.00, 'sale': 700},
-        {'product_name':'华为P30', 'date':'2019-09-14', 'price':5.00, 'sale': 800},
-        {'product_name':'华为P30', 'date':'2019-09-15', 'price':5.00, 'sale': 1200},
-        {'product_name':'华为P30', 'date':'2019-09-16', 'price':5.00, 'sale': 1300},
+        {'product_name':'华为P30', 'date':'2019-09-09', 'price':5.00, 'sale_num': 100, 'comment_num': 330000},
+        {'product_name':'华为P30', 'date':'2019-09-10', 'price':6.00, 'sale_num': 120, 'comment_num': 350000},
+        {'product_name':'华为P30', 'date':'2019-09-11', 'price':5.00, 'sale_num': 140, 'comment_num': 400000},
+        {'product_name':'华为P30', 'date':'2019-09-12', 'price':5.50, 'sale_num': 200, 'comment_num': 410000},
+        {'product_name':'华为P30', 'date':'2019-09-13', 'price':5.00, 'sale_num': 700, 'comment_num': 450000},
+        {'product_name':'华为P30', 'date':'2019-09-14', 'price':5.00, 'sale_num': 800, 'comment_num': 590000},
+        {'product_name':'华为P30', 'date':'2019-09-15', 'price':5.00, 'sale_num': 1200, 'comment_num': 660000},
+        {'product_name':'华为P30', 'date':'2019-09-16', 'price':5.00, 'sale_num': 1300, 'comment_num': 770000},
     ]
     json_data = {'total':len(data), 'data':data}
     return jsonify(json_data)
@@ -93,11 +95,11 @@ def api_product_date(product_id=1):
 
 
 @api.route('/product/emotion', methods = ['GET'])
-@api.route('/product/emotion/<int:product_id>')
-def api_product_emotion(product_id=1):
+@api.route('/product/emotion/<int:origin_id>/<string:goods_id>')
+def api_product_emotion(origin_id=1, goods_id=1):
     """情感分析"""
 
-    from search.web.apps.admin.models import Comment, Product, Category, Crawler
+    from search.web.apps.admin.models import Product, Category, Crawler
 
     data = [
         {'product_name':'华为P30', 'date':'2019-09-09', 'attr':{'电池容量':0.6, '摄像头':0.3, '接口类型':0.3, '网络支持':0.5, '存储容量':0.8, '屏幕大小':-0.3}},
@@ -131,12 +133,17 @@ def api_product_emotion(product_id=1):
 
 
 @api.route('/comment', methods = ['GET', 'POST'])
-@api.route('/comment/<int:pid>')
-@api.route('/comment/<int:pid>/<string:level>')
-@api.route('/comment/<int:pid>/<string:level>/<int:page>')
-def api_comment(pid=1, level='a', page=1):
+@api.route('/comment/<int:origin_id>/<string:goods_id>')
+@api.route('/comment/<int:origin_id>/<string:goods_id>/<string:level>')
+@api.route('/comment/<int:origin_id>/<string:goods_id>/<string:level>/<int:page>')
+def api_comment(origin_id=1, goods_id=1, level='a', page=1):
 
-    from search.web.apps.admin.models import Comment, Product, Category, Crawler, Origin
+    from search.web.apps.admin.models import Product, Category, Crawler, Origin
+
+    origin_id = 1
+
+    if origin_id == 1:
+        from search.web.apps.admin.models import CommentJd as Comment
 
     star = []
     if level == 'a':
@@ -151,22 +158,19 @@ def api_comment(pid=1, level='a', page=1):
 
     per_page = 20
     total = Comment.query \
-        .join(Crawler, Comment.crawler_id == Crawler.id) \
-        .join(Product, Crawler.product_id == Product.id) \
-        .filter(Product.id == pid) \
+        .filter(Comment.origin_id == origin_id) \
+        .filter(Comment.goods_id == goods_id) \
         .filter(Comment.star.in_(star)) \
         .count()
 
     results = Comment.query \
-        .with_entities(Comment.id, Comment.username, Comment.content, Comment.time, Comment.star, Comment.is_member, Comment.avater, Crawler.origin_id, Origin.name.label('origin_name'), Product.name.label('product_name'), Category.name.label('cate_name')) \
-        .join(Crawler, Comment.crawler_id == Crawler.id) \
-        .join(Product, Crawler.product_id == Product.id) \
+        .with_entities(Comment.id, Comment.origin_id, Comment.goods_id, Comment.username, Comment.content, Comment.time, Comment.star, Comment.is_member, Comment.avater, Comment.year, Comment.month, Comment.day, Product.name.label('product_name'), Category.name.label('cate_name')) \
+        .join(Product, Comment.origin_id == Product.origin_id and Comment.goods_id == Product.goods_id) \
         .join(Category, Category.id == Product.cate_id) \
-        .join(Origin, Origin.id == Crawler.origin_id) \
-        .filter(Product.id == pid) \
+        .filter(Comment.origin_id == origin_id) \
+        .filter(Comment.goods_id == goods_id) \
         .filter(Comment.star.in_(star)) \
         .order_by(Comment.id).limit(per_page).offset((page - 1) * per_page).all()
-    paginate = Comment.query.paginate(page, per_page)
 
     # flask_sqlalchemy reuslt->dict
     data = [dict(zip(result.keys(), result)) for result in results]
@@ -185,7 +189,17 @@ def api_comment(pid=1, level='a', page=1):
 # @api.route('/search/product/<string:keywords>/<int:page>')
 def api_search_product(keywords='', page=1):
 
-    from search.web.apps.admin.models import Comment, Product, Category
+    from search.web.apps.admin.models import Product, Category
+
+    post_data = request.form
+
+    if 'origin_id' in post_data.keys():
+        origin_id = int(post_data['origin_id'])
+    else:
+        origin_id = 1
+
+    if origin_id == 1:
+        from search.web.apps.admin.models import CommentJd as Comment
 
     total = Product.query \
             .join(Category, Category.id == Product.cate_id) \
@@ -194,7 +208,6 @@ def api_search_product(keywords='', page=1):
               .with_entities(Product.id.label('product_id'), Product.goods_id, Product.name, Product.title, Product.price, Product.comment_num, Product.photo, Category.name.label('cate_name')) \
               .join(Category, Category.id == Product.cate_id) \
 
-    post_data = request.form
     if 'keywords' in post_data.keys():
         total = total.filter(Product.title.like(f'%{post_data["keywords"]}%'))
         results = results.filter(Product.title.like(f'%{post_data["keywords"]}%'))
@@ -227,7 +240,9 @@ def api_search_product(keywords='', page=1):
         if post_data['order'] == 'price_desc':
             results = results.order_by(Product.price.desc())
 
+    per_page = 20
     total = total.count()
+    results = results.limit(per_page).offset((page - 1) * per_page).all()
 
     # flask_sqlalchemy reuslt->dict
     data = [dict(zip(result.keys(), result)) for result in results]
@@ -241,26 +256,28 @@ def api_search_product(keywords='', page=1):
 
 
 @api.route('/search/comment/', methods = ['GET', 'POST'])
-@api.route('/search/comment/<string:keywords>')
-@api.route('/search/comment/<string:keywords>/<int:page>')
-def api_search_comment(keywords='', page=1):
+@api.route('/search/comment/<int:origin_id>/<string:keywords>')
+@api.route('/search/comment/<int:origin_id>/<string:keywords>/<int:page>')
+def api_search_comment(origin_id=1, keywords='', page=1):
 
-    from search.web.apps.admin.models import Comment, Product, Category, Crawler
+    from search.web.apps.admin.models import Product, Category, Crawler
+
+    if origin_id == 1:
+        from search.web.apps.admin.models import CommentJd as Comment
 
     post_data = request.form
 
     per_page = 20
     total = Comment.query \
-        .join(Crawler, Crawler.id == Comment.crawler_id) \
-        .join(Product, Product.id == Crawler.product_id) \
         .filter(Comment.content.like(f'%{keywords}%')) \
+        .filter(Comment.origin_id == origin_id)\
         .count()
 
     results = Comment.query \
-        .with_entities(Product.id.label('product_id'), Product.goods_id, Product.name, Product.title, Product.price, Product.comment_num, Comment.id.label('comment_id'), Comment.content, Comment.username, Comment.time, Comment.is_member, Comment.star) \
-        .join(Crawler, Crawler.id == Comment.crawler_id) \
-        .join(Product, Product.id == Crawler.product_id) \
+        .with_entities(Product.id.label('product_id'), Product.goods_id, Product.name, Product.title, Product.price, Product.comment_num, Comment.id.label('comment_id'), Comment.content, Comment.username, Comment.time, Comment.is_member, Comment.star, Comment.avater, Comment.year, Comment.month, Comment.day) \
         .filter(Comment.content.like(f'%{keywords}%')) \
+        .filter(Comment.origin_id == origin_id) \
+        .limit(per_page).offset((page - 1) * per_page).all()
 
     data = [dict(zip(result.keys(), result)) for result in results]
 

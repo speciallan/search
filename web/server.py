@@ -243,11 +243,15 @@ def product_add():
 @app.route('/product/list')
 @app.route('/product/list/<int:page>', methods=['GET', 'POST'])
 def product_list(page=1):
-    from search.web.apps.admin.models import Product, Category
+    from search.web.apps.admin.models import Product, Category, Origin
+
+    origin_id = 1
     per_page = 100
     total = Product.query.count()
-    data = Product.query.with_entities(Product.id, Product.goods_id, Product.name, Product.brand, Product.title, Product.price, Product.comment_num, Category.name.label('cate_name'))\
-        .join(Category, Product.cate_id == Category.id)\
+    data = Product.query.with_entities(Product.id, Product.goods_id, Product.name, Product.brand, Product.title, Product.price, Product.comment_num, Category.name.label('cate_name'), Origin.name.label('origin_name'))\
+        .join(Category, Product.cate_id == Category.id) \
+        .join(Origin, Product.origin_id == Origin.id)\
+        .filter(Product.origin_id == origin_id) \
         .order_by(Product.id).limit(per_page).offset((page - 1) * per_page).all()
 
     paginate = Product.query.paginate(page, per_page)
@@ -261,18 +265,24 @@ def product_list(page=1):
 @app.route('/comment/list/<int:page>')
 def comment_list(page=1):
 
-    from search.web.apps.admin.models import Comment, Product, Category, Crawler, Origin
+    from search.web.apps.admin.models import Product, Category, Crawler, Origin
 
-    per_page = 100
-    total = Comment.query.count()
+    origin_id = 1
+    if origin_id == 1:
+        from search.web.apps.admin.models import CommentJd as Comment
+
+    per_page = 200
+    total = Comment.query \
+        .filter(Comment.origin_id == origin_id) \
+        .count()
+
     results = Comment.query\
-        .with_entities(Comment.id, Comment.username, Comment.content, Comment.time, Comment.star, Comment.is_member, Origin.name.label('origin_name'), Product.name.label('product_name'), Category.name.label('cate_name'))\
-        .join(Crawler, Comment.crawler_id == Crawler.id) \
-        .join(Origin, Crawler.origin_id == Origin.id) \
-        .join(Product, Crawler.product_id == Product.id) \
-        .join(Category, Category.id == Product.cate_id)\
+        .with_entities(Comment.id, Comment.origin_id, Comment.goods_id, Comment.username, Comment.content, Comment.time, Comment.star, Comment.is_member, Origin.name.label('origin_name'), Product.name.label('product_name'), Category.name.label('cate_name'))\
+        .join(Product, Product.goods_id == Comment.goods_id) \
+        .join(Category, Category.id == Product.cate_id) \
+        .join(Origin, Origin.id == Comment.origin_id) \
+        .filter(Comment.origin_id == origin_id) \
         .order_by(Comment.id).limit(per_page).offset((page - 1) * per_page).all()
-    paginate = Comment.query.paginate(page, per_page)
 
     # flask_sqlalchemy reuslt->dict
     data = [dict(zip(result.keys(), result)) for result in results]
@@ -284,8 +294,7 @@ def comment_list(page=1):
 
     return render_template('admin/comment_list.html',
                            total=total,
-                           data=data,
-                           paginate=paginate)
+                           data=data)
 
 
 @app.route('/update_product')
@@ -326,6 +335,13 @@ def update_product():
         db.session.flush()
     db.session.commit()
 
+@app.route('/update_product2')
+def update_product2():
+
+    from search.web.apps.admin.models import Product, ProductStatisticsJd, CommentJd, ProductEmotionJd
+    links = open("../scrapy/tutorial/tutorial/spiders/product_url.txt")
+    link = links.read()
+    link = link.split('-----')[:-1]
     for i in link:
         re = i.split('---')
         origin_id, goods_id, cate_id, url, title, price, photo, comment_num = re
@@ -351,7 +367,7 @@ def update_product():
         if not pro_sta_jd:
             # 插入不进去
             pro_sta_jd = ProductStatisticsJd(origin_id, goods_id, price, comment_num, sale_num, year, month, day)
-            # db.session.add(pro_sta_jd)
+            db.session.add(pro_sta_jd)
         else:
             pro_sta_jd.price = price
             pro_sta_jd.comment_num = comment_num
@@ -364,7 +380,49 @@ def update_product():
 
 @app.route('/update_comment')
 def update_comment():
-    pass
+
+    from search.web.apps.admin.models import Product, ProductStatisticsJd, CommentJd, ProductEmotionJd
+    import json
+    links = open("../scrapy/tutorial/tutorial/spiders/mydata1.json", 'r', encoding='utf-8')
+    links = links.read()
+    links = links.split('-----')[:-1]
+
+    for i in links:
+        re = json.loads(i)
+        origin_id, goods_id, username, time1, content, star, is_member, avater = re.values()
+
+        origin_id = int(origin_id)
+
+        if origin_id == 1:
+            from search.web.apps.admin.models import CommentJd as Comment
+
+        db.create_all()
+
+        star = int(star)
+        is_member = int(is_member)
+        crawler_id = 0
+
+        year, month, day = time1.split(' ')[0].split('-')
+
+        time1 = '1970-01-01 00:00' if time1 < '1970-01-01 00:00' else time1
+        timeint = int(time.mktime(time.strptime(time1, "%Y-%m-%d %H:%M")))
+
+        comment = Comment.query \
+            .filter(Comment.origin_id == origin_id) \
+            .filter(Comment.goods_id == goods_id) \
+            .filter(Comment.username == username) \
+            .filter(Comment.time == timeint) \
+            .first()
+
+        if not comment:
+            # 插入不进去
+            comment = Comment(crawler_id, origin_id, goods_id, username, content, timeint, is_member, star, avater, year, month, day)
+            db.session.add(comment)
+
+        db.session.flush()
+    db.session.commit()
+
+    return 'successfully update'
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=8888)

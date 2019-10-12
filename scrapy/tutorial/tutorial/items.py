@@ -32,9 +32,10 @@ class ProductItem(scrapy.Item):
 
 class CommentItem(scrapy.Item):
 
-    origin_id = scrapy.Field()
     crawler_id = scrapy.Field()
+    origin_id = scrapy.Field()
     goods_id = scrapy.Field()
+    cate_id = scrapy.Field()
     username = scrapy.Field()
     time = scrapy.Field()
     content = scrapy.Field()

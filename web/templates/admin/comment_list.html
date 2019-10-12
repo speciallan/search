@@ -44,9 +44,9 @@
 					<thead>
 						<tr class="text-c">
 							<th width="40">ID</th>
+							<th width="40">来源</th>
 							<th width="40">类别</th>
 							<th width="50">商品</th>
-							<th width="40">来源</th>
 							<th width="80">用户名</th>
 							<th width="180">评论</th>
 							<th width="50">时间</th>
@@ -59,9 +59,9 @@
                     	{% for item in data %}
 						<tr class="text-c">
 							<td>{{item.id}}</td>
+							<td>{{item.origin_name}}</td>
 							<td>{{item.cate_name}}</td>
 							<td>{{item.product_name}}</td>
-							<td>{{item.origin_name}}</td>
 							<td class="text-l"><u style="cursor:pointer" class="text-primary" onClick="article_edit('查看','article-zhang.html','10001')" title="查看">{{item.username}}</u></td>
 							<td>{{item.content}}</td>
 							<td>{{item.time_str}}</td>

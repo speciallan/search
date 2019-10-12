@@ -174,27 +174,6 @@ class ProductEmotionJd(BaseModel):
     day = db.Column(db.String(10), default=0)
 
 
-class Comment(BaseModel):
-    __tablename__ = "comment"
-    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    crawler_id = db.Column(db.Integer)
-    username = db.Column(db.String(20), default='')
-    content = db.Column(db.Text(), default='')
-    time = db.Column(db.Integer)
-    is_member = db.Column(db.Integer(), default=0)
-    star = db.Column(db.Integer(), default=0)
-    avater = db.Column(db.String(255), default='')
-
-    def __init__(self, crawler_id, username, content, time, is_member, star, avater):
-        self.crawler_id = crawler_id
-        self.username = username
-        self.content = content
-        self.time = time
-        self.is_member = is_member
-        self.star = star
-        self.avater = avater
-
-
 class Crawler(BaseModel):
     __tablename__ = "crawler"
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
@@ -223,10 +202,12 @@ class Origin(BaseModel):
     __tablename__ = 'origin'
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     name = db.Column(db.String(20), default='')
+    label = db.Column(db.String(10), default='')
     site = db.Column(db.String(100), default='')
 
-    def __init__(self, name, site):
+    def __init__(self, name, label, site):
         self.name = name
+        self.label = label
         self.site = site
 
 
