@@ -18,7 +18,7 @@ class ProductSpider(scrapy.Spider):
         super(ProductSpider, self).__init__(*args, **kwargs)
         self.pre_url = self.origins[origin_id]
         self.cate_id = cate_id
-        self.orgin_id = origin_id
+        self.origin_id = origin_id
 
         start_urls = []
         # 获取前十页的链接
@@ -34,19 +34,15 @@ class ProductSpider(scrapy.Spider):
 
         item['goods_id'] = response.xpath("//li[@class='gl-item']/@data-sku").extract()
         item["url"] = response.xpath('//div[@class="p-name p-name-type-2"]/a[@target="_blank"]/@href').extract()
-        item["title"] = response.xpath("//div[@class='p-name p-name-type-2']/a[@target='_blank']/@title").extract()
+        item["title"] = response.xpath("//div[@class='p-name p-name-type-2']/a/em/text()").extract()
         item["price"] = response.xpath("//div[@class='p-price']/strong/i/text()").extract()
         item['photo'] = response.xpath("//div[@class='p-img']/a/img/@source-data-lazy-img").extract()
 
-        # 将链接存入txt文件中，方便抓取评论，
-        for i in range(0, len(item["url"])):
-
-            item["url"][i] = 'https:' + item["url"][i]
-            item["photo"][i] = 'https:' + item["photo"][i]
-
-            with open('product_url.txt', 'a') as f:
-                f.write(item['goods_id'][i] + '---' + item["url"][i] + '---' + item['title'][i] + '---' + item['price'][i] + '---' + item['photo'][i] + '\n')
-                f.close()
+        item['origin_id'] = []
+        item['cate_id'] = []
+        for i in range(len(item['goods_id'])):
+            item['origin_id'].append(self.origin_id)
+            item['cate_id'].append(self.cate_id)
 
         return item
 

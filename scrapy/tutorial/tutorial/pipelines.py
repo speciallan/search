@@ -9,6 +9,7 @@ import codecs
 import json
 import re
 from .items import ProductItem
+import urllib.request
 
 
 class TutorialPipeline(object):
@@ -19,12 +20,31 @@ class TutorialPipeline(object):
 class CommentPipeline(object):
     """针对每一个items里面的对象"""
 
-    def __init__(self):
-        self.file = codecs.open("mydata1.json", "wb", encoding="utf-8")
 
     def process_item(self, item, spider):
 
         if isinstance(item, ProductItem):
+
+            item['comment_num'] = []
+            for i in range(len(item["goods_id"])):
+                # 得到评论数
+                # https://club.jd.com/clubservice.aspx?method=GetCommentsCount&referenceIds=
+                commentUrl = "https://club.jd.com/comment/productCommentSummaries.action?referenceIds=" + str(item['goods_id'][i])
+                commentData = urllib.request.urlopen(commentUrl).read().decode("utf-8", "ignore")
+                patt1 = r'"CommentCount":(\d+),'
+                comment_num = re.findall(patt1, commentData)
+                item['comment_num'].append(comment_num[0])
+
+            # 将链接存入txt文件中，方便抓取评论，
+            for i in range(0, len(item["url"])):
+
+                item["url"][i] = 'https:' + item["url"][i]
+                item["photo"][i] = 'https:' + item["photo"][i]
+
+                with open('product_url.txt', 'a') as f:
+                    f.write(item['origin_id'][i] + '---' + item['goods_id'][i] + '---' + item['cate_id'][i] + '---' + item["url"][i] + '---' + item['title'][i] + '---' + item['price'][i] + '---' + item['photo'][i] + '---' + item['comment_num'][i] + '-----')
+                    f.close()
+
             return item
 
         # 评论pipeline
@@ -56,6 +76,10 @@ class CommentPipeline(object):
             result = re.findall(r'\d+', item['star'][i])[0]
             item['star'][i] = int(result)
 
+        # 处理头像
+        for i in range(len(item['avater'])):
+            item['avater'][i] = 'https:' + item['avater'][i]
+
         # 处理会员
         for i in range(len(item['is_member'])):
             if '会员' in item['is_member'][i]:
@@ -64,28 +88,34 @@ class CommentPipeline(object):
                 item['is_member'][i] = 0
 
         # 写json
+        file = codecs.open("mydata1.json", "a", encoding="utf-8")
         for j in range(0, len(item["username"])):
 
             # crawler_id = item["crawler_id"][j]
+            origin_id = item["origin_id"][j]
             goods_id = item["goods_id"][j]
             username = item["username"][j]
             time = item["time"][j]
             content = item["content"][j]
             star = item["star"][j]
             is_member = item["is_member"][j]
+            avater = item["avater"][j]
 
             goods1 = {
                 # "crawler_id":crawler_id,
+                      "origin_id": origin_id,
                       "goods_id": goods_id,
                       "username": username,
                       "time":time,
                       "content": content,
                       'star': star,
-                      'is_member': is_member}
+                      'is_member': is_member,
+                      'avater': avater}
 
             i = json.dumps(dict(goods1), ensure_ascii=False)
             line = i + '\n'
-            self.file.write(line)
+            file.write(line)
+        file.close()
 
         return item
 
@@ -93,7 +123,6 @@ class CommentPipeline(object):
         print('爬虫开始了...')
 
     def close_spider(self, spider):
-        self.file.close()
         print('爬虫结束了...')
 
 

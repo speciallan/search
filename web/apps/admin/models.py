@@ -91,6 +91,7 @@ class Attribute(BaseModel):
 class Product(BaseModel):
     __tablename__ = "product"
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    origin_id = db.Column(db.Integer, default=0)
     goods_id = db.Column(db.String(20), default='')
     name = db.Column(db.String(20), default='')
     cate_id = db.Column(db.Integer)
@@ -100,7 +101,8 @@ class Product(BaseModel):
     comment_num = db.Column(db.Integer, default=0)
     photo = db.Column(db.String(255), default='')
 
-    def __init__(self, goods_id, name, cate_id, brand, title, price, comment_num, photo):
+    def __init__(self, origin_id, goods_id, name, cate_id, brand, title, price, comment_num, photo):
+        self.origin_id = origin_id
         self.goods_id = goods_id
         self.name = name
         self.cate_id = cate_id
@@ -109,6 +111,67 @@ class Product(BaseModel):
         self.price = price
         self.comment_num = comment_num
         self.photo = photo
+
+
+class ProductStatisticsJd(BaseModel):
+    __tablename__ = "product_statistics_jd"
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    origin_id = db.Column(db.Integer, default=1)
+    goods_id = db.Column(db.String(20), default='')
+    price = db.Column(db.Float, default=0)
+    comment_num = db.Column(db.Integer, default=0)
+    sale_num = db.Column(db.Integer, default=0)
+    year = db.Column(db.String(10), default='')
+    month = db.Column(db.String(10), default='')
+    day = db.Column(db.String(10), default='')
+
+    def __init__(self, origin_id, goods_id, price, comment_num, sale_num, year, month, day):
+        self.origin_id = origin_id
+        self.goods_id = goods_id
+        self.price = price
+        self.comment_num = comment_num
+        self.sale_num = sale_num
+        self.year = year
+        self.month = month
+        self.day = day
+
+class CommentJd(BaseModel):
+    __tablename__ = "comment_jd"
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    crawler_id = db.Column(db.Integer)
+    origin_id = db.Column(db.Integer, default=1)
+    goods_id = db.Column(db.String(20), default='')
+    username = db.Column(db.String(20), default='')
+    content = db.Column(db.Text(), default='')
+    time = db.Column(db.Integer)
+    is_member = db.Column(db.Integer(), default=0)
+    star = db.Column(db.Integer(), default=0)
+    avater = db.Column(db.String(255), default='')
+    year = db.Column(db.String(10), default=0)
+    month = db.Column(db.String(10), default=0)
+    day = db.Column(db.String(10), default=0)
+
+    def __init__(self, crawler_id, origin_id, goods_id, username, content, time, is_member, star, avater, year, month, day):
+        self.crawler_id = crawler_id
+        self.origin_id = origin_id
+        self.goods_id= goods_id
+        self.username = username
+        self.content = content
+        self.time = time
+        self.is_member = is_member
+        self.star = star
+        self.avater = avater
+        self.year = year
+        self.month = month
+        self.day= day
+
+class ProductEmotionJd(BaseModel):
+    __tablename__ = "product_emotion_jd"
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    goods_id = db.Column(db.String(20), default='')
+    year = db.Column(db.String(10), default=0)
+    month = db.Column(db.String(10), default=0)
+    day = db.Column(db.String(10), default=0)
 
 
 class Comment(BaseModel):

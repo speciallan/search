@@ -48,6 +48,9 @@ DEFAULT_REQUEST_HEADERS = {
   'Accept-Language': 'en',
 }
 
+REDIRECT_ENABLED = False                       # 关掉重定向, 不会重定向到新的地址
+HTTPERROR_ALLOWED_CODES = [301, 302]     # 返回301, 302时, 按正常返回对待, 可以正常写入cookie
+
 # Enable or disable spider middlewares
 # See https://doc.scrapy.org/en/latest/topics/spider-middleware.html
 #SPIDER_MIDDLEWARES = {

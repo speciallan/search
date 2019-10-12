@@ -232,8 +232,9 @@ def product_add():
         title = request.form.get('title')
         price = request.form.get('price')
         comment_num = request.form.get('comment_num')
+        photo = request.form.get('photo')
 
-        product = Product(goods_id, name, cate_id, brand, title, price, comment_num)
+        product = Product(goods_id, name, cate_id, brand, title, price, comment_num, photo)
         db.session.add(product)
         db.session.commit()
         return redirect('product/list')
@@ -287,6 +288,83 @@ def comment_list(page=1):
                            paginate=paginate)
 
 
+@app.route('/update_product')
+def update_product():
+
+    from search.web.apps.admin.models import Product, ProductStatisticsJd, CommentJd, ProductEmotionJd
+
+    # db.drop_all()
+    db.create_all()
+
+    links = open("../scrapy/tutorial/tutorial/spiders/product_url.txt")
+    link = links.read()
+    link = link.split('-----')[:-1]
+    for i in link:
+        re = i.split('---')
+        origin_id, goods_id, cate_id, url, title, price, photo, comment_num = re
+
+        origin_id = int(origin_id)
+        cate_id = int(cate_id)
+        name = title[:15]
+        brand = title[:15]
+
+        product = Product.query.filter(Product.origin_id == origin_id).filter(Product.goods_id == goods_id).first()
+
+        if not product:
+            product = Product(origin_id, goods_id, name, cate_id, brand, title, price, comment_num, photo)
+            db.session.add(product)
+        else:
+            product.origin_id = origin_id
+            product.goods_id = goods_id
+            product.name = name
+            product.cate_id = cate_id
+            product.brand = brand
+            product.title = title
+            product.price = price
+            product.comment_num = comment_num
+            product.photo = photo
+        db.session.flush()
+    db.session.commit()
+
+    for i in link:
+        re = i.split('---')
+        origin_id, goods_id, cate_id, url, title, price, photo, comment_num = re
+
+        origin_id = int(origin_id)
+        cate_id = int(cate_id)
+
+        price = float(price)
+        comment_num = int(comment_num)
+        sale_num = int(comment_num)
+
+        date = datetime.datetime.utcfromtimestamp(time.time()).strftime('%Y-%m-%d')
+        year, month, day = date.split('-')
+
+        pro_sta_jd = ProductStatisticsJd.query\
+            .filter(ProductStatisticsJd.origin_id == origin_id)\
+            .filter(ProductStatisticsJd.goods_id == goods_id)\
+            .filter(ProductStatisticsJd.year == year) \
+            .filter(ProductStatisticsJd.month == month)\
+            .filter(ProductStatisticsJd.day == day)\
+            .first()
+
+        if not pro_sta_jd:
+            # 插入不进去
+            pro_sta_jd = ProductStatisticsJd(origin_id, goods_id, price, comment_num, sale_num, year, month, day)
+            # db.session.add(pro_sta_jd)
+        else:
+            pro_sta_jd.price = price
+            pro_sta_jd.comment_num = comment_num
+            pro_sta_jd.sale_num = sale_num
+
+        db.session.flush()
+    db.session.commit()
+
+    return 'successfully update'
+
+@app.route('/update_comment')
+def update_comment():
+    pass
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=8888)
