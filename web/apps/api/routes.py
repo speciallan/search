@@ -7,11 +7,32 @@ import datetime
 api = Blueprint('api', __name__)
 
 
+@api.route('/origin', methods = ['GET'])
+@api.route('/origin/<int:page>')
+def api_origin(page=1):
+
+    from search.web.apps.admin.models import Origin
+
+    per_page = 20
+    total = Origin.query.count()
+
+    results = Origin.query \
+        .with_entities(Origin.id, Origin.name, Origin.label, Origin.site) \
+        .order_by(Origin.id).limit(per_page).offset((page - 1) * per_page).all()
+
+    # flask_sqlalchemy reuslt->dict
+    data = [dict(zip(result.keys(), result)) for result in results]
+
+    json_data = {'total':total, 'data':data}
+
+    return jsonify(json_data)
+
+
 @api.route('/category', methods = ['GET'])
 @api.route('/category/<int:page>')
 def api_category(page=1):
 
-    from search.web.apps.admin.models import Comment, Product, Category, Crawler
+    from search.web.apps.admin.models import Product, Category, Crawler
 
     per_page = 20
     total = Category.query.count()
