@@ -216,9 +216,13 @@ def api_search_product(keywords='', page=1):
         total = total.filter(Product.cate_id == post_data['cate_id'])
         results = results.filter(Product.cate_id == post_data['cate_id'])
 
+    if 'title' in post_data.keys():
+        total = total.filter(Product.title.like(f'%{post_data["title"]}%'))
+        results = results.filter(Product.title.like(f'%{post_data["title"]}%'))
+
     if 'brand' in post_data.keys():
-        total = total.filter(Product.brand.like(post_data['brand']))
-        results = results.filter(Product.brand.like(post_data['brand']))
+        total = total.filter(Product.brand.like(f'%{post_data["brand"]}%'))
+        results = results.filter(Product.brand.like(f'%{post_data["brand"]}%'))
 
     if 'price_min' in post_data.keys() and 'price_max' in post_data.keys():
         total = total.filter(Product.price >= int(post_data['price_min']))
