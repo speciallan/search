@@ -152,6 +152,38 @@ def crawler_list(page=1):
                            paginate=paginate)
 
 
+@app.route('/origin/add', methods = ['GET', 'POST'])
+def origin_add():
+    if request.method == "GET":
+        return render_template('admin/origin_add.html')
+
+    elif request.method == "POST":
+        from search.web.apps.admin.models import Origin
+        name = request.form.get('name')
+        label = request.form.get('label')
+        site = request.form.get('site')
+
+        origin = Origin(name, label, site)
+        db.session.add(origin)
+        db.session.commit()
+        return redirect('origin/list')
+
+
+@app.route('/origin/list')
+@app.route('/origin/list/<int:page>', methods=['GET', 'POST'])
+def origin_list(page=1):
+    from search.web.apps.admin.models import Origin
+    per_page = 100
+    total = Origin.query.count()
+    data = Origin.query.order_by(Origin.id).limit(per_page).offset((page - 1) * per_page).all()
+    paginate = Origin.query.paginate(page, per_page)
+
+    return render_template('admin/origin_list.html',
+                           total=total,
+                           data=data,
+                           paginate=paginate)
+
+
 @app.route('/category/add', methods = ['GET', 'POST'])
 def category_add():
     if request.method == "GET":
