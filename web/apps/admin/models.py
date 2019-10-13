@@ -69,9 +69,11 @@ class User(BaseModel):
 class Category(BaseModel):
     __tablename__ = "category"
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    parent_id = db.Column(db.Integer, default=0)
     name = db.Column(db.String(100), default='')
 
-    def __init__(self, name):
+    def __init__(self, parent_id, name):
+        self.parent_id = parent_id
         self.name = name
 
 

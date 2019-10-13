@@ -191,9 +191,10 @@ def category_add():
 
     elif request.method == "POST":
         from search.web.apps.admin.models import Category
+        parent_id = request.form.get('parent_id')
         name = request.form.get('name')
 
-        cate = Category(name)
+        cate = Category(parent_id, name)
         db.session.add(cate)
         db.session.commit()
         return redirect('category/list')
@@ -205,13 +206,35 @@ def category_list(page=1):
     from search.web.apps.admin.models import Category
     per_page = 100
     total = Category.query.count()
-    data = Category.query.order_by(Category.id).limit(per_page).offset((page - 1) * per_page).all()
-    paginate = Category.query.paginate(page, per_page)
+    first = Category.query.with_entities(Category.id, Category.parent_id, Category.name).filter(Category.parent_id == 0)
+
+    second = Category.query \
+        .with_entities(Category.id, Category.parent_id, Category.name) \
+        .filter(Category.parent_id.in_(
+        Category.query.with_entities(Category.id).filter(Category.parent_id == 0)
+    )) \
+        .order_by(Category.id).limit(per_page).offset((page - 1) * per_page).all()
+
+    # flask_sqlalchemy reuslt->dict
+
+    first = [dict(zip(result.keys(), result)) for result in first]
+    second = [dict(zip(result.keys(), result)) for result in second]
+
+    data = {}
+    for d in first:
+        data[d['id']] = d
+        data[d['id']]['sub'] = []
+
+    for d in second:
+        data[d['parent_id']]['sub'].append(d)
+
+    arr = []
+    for k,v in data.items():
+        arr.append(v)
 
     return render_template('admin/category_list.html',
                            total=total,
-                           data=data,
-                           paginate=paginate)
+                           data=arr)
 
 
 @app.route('/attribute/add', methods = ['GET', 'POST'])

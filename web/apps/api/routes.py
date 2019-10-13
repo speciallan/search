@@ -36,13 +36,27 @@ def api_category(page=1):
 
     per_page = 20
     total = Category.query.count()
+    first = Category.query.with_entities(Category.id, Category.parent_id, Category.name).filter(Category.parent_id == 0)
 
-    results = Category.query \
-        .with_entities(Category.id, Category.name) \
+    second = Category.query \
+        .with_entities(Category.id, Category.parent_id, Category.name) \
+        .filter(Category.parent_id.in_(
+            Category.query.with_entities(Category.id).filter(Category.parent_id == 0)
+        )) \
         .order_by(Category.id).limit(per_page).offset((page - 1) * per_page).all()
 
     # flask_sqlalchemy reuslt->dict
-    data = [dict(zip(result.keys(), result)) for result in results]
+
+    first = [dict(zip(result.keys(), result)) for result in first]
+    second = [dict(zip(result.keys(), result)) for result in second]
+
+    data ={}
+    for d in first:
+        data[d['id']] = d
+        data[d['id']]['sub'] = []
+
+    for d in second:
+        data[d['parent_id']]['sub'].append(d)
 
     json_data = {'total':total, 'data':data}
 

@@ -28,16 +28,25 @@
 				<table class="table table-border table-bordered table-bg table-hover table-sort">
 					<thead>
 					<tr class="text-c">
-						<th width="40">ID</th>
-						<th width="180">分类名称</th>
+						<th width="80">ID</th>
+						<th width="80">父类</th>
+						<th>分类名称</th>
 					</tr>
 					</thead>
 					<tbody>
-					{% for item in data %}
-					<tr class="text-c">
-						<td>{{item.id}}</td>
-						<td>{{item.name}}</td>
+					{% for cate in data %}
+					<tr class="text-l">
+						<td>{{cate.id}}</td>
+						<td>{{cate.parent_id}}</td>
+						<td>{{cate.name}}</td>
 					</tr>
+						{% for item in cate.sub %}
+						<tr class="text-l">
+							<td>{{item.id}}</td>
+							<td>{{item.parent_id}}</td>
+							<td>— {{item.name}}</td>
+						</tr>
+						{% endfor %}
 					{% endfor %}
 
 					</tbody>
